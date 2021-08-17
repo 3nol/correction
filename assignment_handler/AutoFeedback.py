@@ -1,20 +1,16 @@
-import os, string
-
+import os
+import re
 from jellyfish import levenshtein_distance
-
-from .SSHConnector import TitanConnector
-
+from SSHConnector import SSHConnector
 
 
-
-
-class AutoFeedback(TitanConnector):
+class AutoFeedback(SSHConnector):
     """Handles executing assignment files and generating an output file"""
 
     def __init__(self, pop: str, pw: str, server: str, port: int = 22, local_location: str = ""):
         super().__init__(pop, pw, server, port, local_location)
 
-    def split_tasks(self, solution_file: str):
+    def split_tasks(self, solution_file: str) -> list[str]:
         """Splits a solution file in the connector.local_location into individual task files"""
         with open(self.local_location + solution_file, 'r') as file:
             content = file.readlines()
@@ -57,5 +53,5 @@ class AutoFeedback(TitanConnector):
 
     def generate_feedback_file(self):
         """Generates the feedback file based on a template and on the evaluation"""
-        # TODO template file
+        # TODO template file, already done? I don't understand this
         return True

@@ -2,14 +2,15 @@ import paramiko
 import os
 
 
-def ensure_tailing_os_sep(path: str):
-    return path if path[-1] == os.sep else path + os.sep
+def tailing_os_sep(path: str, should_have_sep: bool) -> str:
+    if path[-1] != os.sep and should_have_sep:
+        return path + os.sep
+    elif path[-1] == os.sep and not should_have_sep:
+        return path[0:-1]
+    return path
 
-def remove_tailing_os_sep(path: str):
-    return path if path[-1] != os.sep else path[0:-1]
 
-
-class TitanConnector:
+class SSHConnector:
     """Connector for the TitanServer (Generic SSH connector)"""
 
     def __init__(self, pop: str, pw: str, server: str, port: int = 22, local_location: str = ""):
@@ -18,7 +19,7 @@ class TitanConnector:
         self.server = server
         self.port = port
         self.ssh = None
-        self.local_location = ensure_tailing_os_sep(local_location)
+        self.local_location = tailing_os_sep(local_location, True)
 
     def init_connection(self):
         """Creates an SSH Connection to the specified host"""
@@ -49,8 +50,7 @@ class TitanConnector:
         sftp.get(remotepath=remote_dir, localpath=local_dir)
         sftp.close()
 
-    def run_command(self, command: str, stdin_input: list[str] = None, remove_trailing_new_lines: bool = True, close_connection:bool = True) -> tuple[
-        list, list]:
+    def run_command(self, command: str, stdin_input: list[str] = None, remove_trailing_new_lines: bool = True, close_connection:bool = True) -> tuple[list, list]:
         """Runs a bash command on the remote server , returns stdout and stderr"""
         if not self.ssh:
             self.init_connection()
@@ -102,7 +102,7 @@ class TitanConnector:
 
     def get_all_files_with_extension(self, root_dir: str, extension: str):
         """Generates a list of all files relative to the root_dir that have an specific location"""
-        stdout, _ = self.run_command(f'find {remove_tailing_os_sep(root_dir)}  -type f -name "*.{extension}"')
+        stdout, _ = self.run_command(f'find {tailing_os_sep(root_dir, False)}  -type f -name "*.{extension}"')
         return stdout
 
     def execute_all_sh_files(self, root_dir: str, instant_copy: bool = False):

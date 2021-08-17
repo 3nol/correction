@@ -1,16 +1,14 @@
 import os
-from SSHConnector import TitanConnector
+from SSHConnector import SSHConnector
 
 
 def path_without_root(path: str, root: str) -> str:
     """A quick hack to remove a Base-Path from a path and later replace it with a remote path"""
-
     return os.sep.join([i for i in path.split(os.sep) if i not in root.split(os.sep)])
 
 
-def upload_folder_structure(local_dir: str, remote_dir: str, connector: TitanConnector, with_files=True):
+def upload_folder_structure(local_dir: str, remote_dir: str, connector: SSHConnector, with_files=True):
     """Walks a folder structure top down first creating all remote dirs then copying the files"""
-
     for root, dirs, files in os.walk(local_dir, topdown=True):
         for name in dirs:
             if not name[0] == '.':

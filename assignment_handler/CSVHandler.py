@@ -3,7 +3,6 @@ import shutil
 import datetime
 import os
 
-
 # TODO Workflow ??
 # TODO Compare to Solution ??
 # TODO Outputfile ??
@@ -19,6 +18,7 @@ def total_points(row: dict) -> tuple[int, int]:
             if row[i] != '':
                 sum += int(row[i])
     return sum, ass_count
+
 
 def parse_points(feedback_path: str) -> tuple[list[str], int, int]:
     name = feedback_path.split(os.sep)[-1].rsplit(".", 1)[0].split("_")[0:2]
