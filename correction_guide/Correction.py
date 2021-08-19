@@ -33,15 +33,13 @@ class Correction:
         if os.stat(self.tmp_file).st_size == 0:
             create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
             print('all feedback templates generated')
+            last_name = tutti_names[0]
             self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-            with open(self.tmp_file, 'w') as file:
-                last_name = tutti_names[0]
-                file.write(last_name + '\n' + self.pointer)
-                print('initialized progress save')
+            self.write_save(last_name)
+            print('initialized progress save')
         else:
             with open(self.tmp_file, 'r') as save:
-                last_name = save.readlines()[0]
-                self.pointer = save.readlines()[1]
+                (last_name, self.pointer) = save.readline().split(' : ', 1)
         self.correction(tutti_names, last_name)
 
     def correction(self, tutti_names: list[str], last_name: str) -> None:
@@ -54,7 +52,7 @@ class Correction:
                 if last_name == name:
                     path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                     # TODO correction
-                    last_name = tutti_names[tutti_names.index(last_name) + 1]
+                    last_name = tutti_names[(tutti_names.index(last_name) + 1) % len(tutti_names)]
                     self.write_save(last_name)
                     # insert_at(feedback_path, '3.a', '1', 'Gut gemacht, du Esel!')
             self.increment_pointer()
@@ -76,4 +74,4 @@ class Correction:
         """Save the last_name edited as well as the progress points to the save file"""
 
         with open(self.tmp_file, 'w') as save:
-            save.write(last_name + '\n' + self.pointer)
+            save.write(last_name + ' : ' + self.pointer)
