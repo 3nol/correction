@@ -60,8 +60,8 @@ class Correction:
 
     def increment_pointer(self) -> None:
         """Increments the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
-        1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3.
-        """
+        1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3."""
+
         (task, subtask) = self.pointer.split('.', 1)
         if subtask == '' or len(self.exercise_points[int(task) - 1]) <= ord(subtask) - 96:
             task = str(int(task) + 1)
