@@ -1,10 +1,12 @@
 import ast
 import os
 
-config_path = 'C:\\Users\\leonw\\Documents\\Studium Uni Konstanz\\Kurse\\4. Semester\\SQ\\'
+from Private import config_path
 
 
-def tailing_os_sep(path: str, should_have_sep: bool) -> str:
+def tailing_os_sep(path: str, should_have_sep: bool = True) -> str:
+    """Small helper function that ensures that there is or is not a tailing path separator"""
+
     if path[-1] != os.sep and should_have_sep:
         return path + os.sep
     elif path[-1] == os.sep and not should_have_sep:
@@ -13,6 +15,8 @@ def tailing_os_sep(path: str, should_have_sep: bool) -> str:
 
 
 def get_exercise_points(ass_number: str) -> list[list[str]]:
+    """Reads the points distribution of a given assignment number from the assignment config file"""
+
     exercise_points = []
     with open(config_path + 'assignment_config.txt', 'r') as file:
         for line in file.readlines():
@@ -23,6 +27,8 @@ def get_exercise_points(ass_number: str) -> list[list[str]]:
 
 
 def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_points: list[list[str]]):
+    """Goes through all names in the directory (except fuchs) and fills in a generated feedback file"""
+
     empty_feedback = generate_feedback_file(ass_number, exercise_points, corrector)
     for name in [f.path for f in os.scandir(file_path) if f.is_dir()]:
         if 'fuchs' not in name:
@@ -33,6 +39,9 @@ def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_p
 
 
 def generate_feedback_file(ass_number: str, exercise_points: list[list[str]], corrector: str) -> list[str]:
+    """Does the feedback generation, using the assignment number, the exercise point distribution
+    and the name of the corrector"""
+
     lines = ['Feedback Assignment ' + ass_number + '\n', '[0/10]\n', 'Tutor: ' + corrector + '\n', '\n', '\n']
     task_counter = 1
     for exercise in exercise_points:
@@ -51,7 +60,10 @@ def generate_feedback_file(ass_number: str, exercise_points: list[list[str]], co
     return lines
 
 
-def insert_at(file_path: str, exercise_pointer: str, points: str, text: str):
+def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> None:
+    """Method to edit/ fill in the correction into a pre-generated feedback file.
+    This includes the points and a text for a given exercise."""
+
     with open(file_path, 'r') as file:
         current_file = file.readlines()
     index = 0
