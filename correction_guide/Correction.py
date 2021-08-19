@@ -60,19 +60,22 @@ class Correction:
                         for line in temp:
                             line = line.replace('\n', '')
                             print(line)
-                    # TODO correction
-                    correct = str(input('Is the solution correct? [y/n] \n'))
-                    comment = str(input('Please enter some comments\n'))
-                    (task, subtask) = self.pointer.split('.', 1)
-                    possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
-                        if len(self.exercise_points[int(task) - 1]) > 1 else self.exercise_points[int(task) - 1][0]
-                    if correct == 'n':
-                        points = possible_points + 1
-                        while int(points) > possible_points:
-                            points = int(input('How many points should ' + name + ' get for this exercise?\n'
-                                               + str(possible_points) + ' are possible!\n'))
+                        # TODO correction
+                        correct = str(input('Is the solution correct? [y/n] \n'))
+                        comment = str(input('Please enter some comments\n'))
+                        (task, subtask) = self.pointer.split('.', 1)
+                        possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+                            if len(self.exercise_points[int(task) - 1]) > 1 else self.exercise_points[int(task) - 1][0]
+                        if correct == 'n':
+                            points = possible_points + 1
+                            while int(points) > possible_points:
+                                points = int(input('How many points should ' + name + ' get for this exercise?\n'
+                                                   + str(possible_points) + ' are possible!\n'))
+                        else:
+                            points = possible_points
                     else:
-                        points = possible_points
+                        points = 0
+                        comment = 'no solution'
                     insert_at(path, self.pointer, str(points), comment)
                     last_name = tutti_names[(tutti_names.index(last_name) + 1) % len(tutti_names)]
                     self.write_save(last_name)
