@@ -32,7 +32,7 @@ def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_p
     empty_feedback = generate_feedback_file(ass_number, exercise_points, corrector)
     for name in [f.path for f in os.scandir(file_path) if f.is_dir()]:
         if 'fuchs' not in name:
-            feedback_path = tailing_os_sep(name, True) + 'feedback' + os.path.sep + 'assignment' + ass_number + '.txt'
+            feedback_path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt'
             with open(feedback_path, 'w') as file:
                 file.writelines(empty_feedback)
             print('generated file ' + feedback_path)

@@ -18,7 +18,7 @@ class Correction:
         self.corrector = corrector
         self.pointer = ''
         self.exercise_points = get_exercise_points(self.assignment_number)
-        self.tmp_file = tailing_os_sep(file_path, True) + 'correct_tmp.txt'
+        self.tmp_file = f'{tailing_os_sep(file_path, True)}correct_tmp.txt'
         if not os.path.isfile(self.tmp_file):
             with open(self.tmp_file, 'w') as file:
                 file.write('')
@@ -52,7 +52,7 @@ class Correction:
         while int(self.pointer.split('.', 1)[0]) <= len(self.exercise_points):
             for name in tutti_names:
                 if last_name == name:
-                    feedback_path = tailing_os_sep(name, True) + 'feedback/assignment' + self.assignment_number + '.txt'
+                    path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                     # TODO correction
                     last_name = tutti_names[tutti_names.index(last_name) + 1]
                     self.write_save(last_name)
@@ -70,7 +70,7 @@ class Correction:
             subtask = 'a' if len(self.exercise_points[int(task) - 1]) > 1 else ''
         else:
             subtask = chr(ord(subtask) + 1)
-        self.pointer = task + '.' + subtask
+        self.pointer = f'{task}.{subtask}'
 
     def write_save(self, last_name: str) -> None:
         """Save the last_name edited as well as the progress points to the save file"""
