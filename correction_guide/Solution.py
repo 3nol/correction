@@ -2,8 +2,13 @@ import os
 from Utility import get_exercise_points, tailing_os_sep
 from Private import source_path
 
+# to generate empty solutions for every student
+
 
 def create_empty_solution(student: str, number: str):
+    """ creating a list of lines containing an empty template for the solution of a given
+    assigment number by using the assignment_config.txt"""
+
     exercise_points = get_exercise_points(number)
     lines = ['# Assignment ' + number + '\n', '# ' + student + '\n', '#\n']
     task_counter = 1
