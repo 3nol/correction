@@ -112,6 +112,9 @@ class Correction:
             save.write(last_name + ' : ' + self.pointer)
 
     def check_difference(self, filepath: str):
+        """ Checking if the person made the exercise which means there is a different to the empty
+        solution from the beginning. Checking every task on it's own to minimize the correcting"""
+
         with open(filepath, 'r') as file:
             current_file = file.readlines()
         names = filepath.split(os.path.sep)
