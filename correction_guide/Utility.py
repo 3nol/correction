@@ -1,5 +1,6 @@
 import ast
 import os
+import re
 
 from Private import config_path
 
@@ -66,17 +67,42 @@ def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> 
 
     with open(file_path, 'r') as file:
         current_file = file.readlines()
-    index = 0
-    (task, subtask) = exercise_pointer.split('.', 1)
-    match = 'Task ' + task
-    for line in current_file:
-        if line.startswith(match):
-            if match != subtask and subtask != '':
-                match = subtask
-            else:
-                break
-        index += 1
+    index = get_index(current_file, exercise_pointer)
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
     with open(file_path, 'w') as file:
         file.writelines(current_file)
+
+
+def get_index(current_file, exercise_pointer: str) -> int:
+    """ Method to get the start index of an exercise in the feedback or solution file"""
+
+    index: int = 0
+    (task, subtask) = exercise_pointer.split('.', 1)
+    match = 'Task ' + task
+    for line in current_file:
+        if line.startswith('# ' + match) or line.startswith(match):
+            if match != subtask + ')' and subtask != '':
+                match = subtask + ')'
+            else:
+                break
+        index += 1
+    return index
+
+
+def get_solution(file_path: str, exercise_pointer: str):
+    """Method to get the solution of an exercise of a person.
+    Getting to the end of the exercise before and taking then
+    everything to the end of the current task"""
+
+    solution = [exercise_pointer + '\n']
+    with open(file_path, 'r') as file:
+        current_file = file.readlines()
+    index = get_index(current_file, exercise_pointer)
+    safe_i = index
+    while current_file[index - 1].startswith('#'):
+        index -= 1
+    while index <= safe_i or not current_file[index].startswith('#'):
+        solution.append(current_file[index])
+        index += 1
+    return solution
