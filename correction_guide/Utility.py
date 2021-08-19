@@ -95,7 +95,7 @@ def get_solution(file_path: str, exercise_pointer: str):
     Getting to the end of the exercise before and taking then
     everything to the end of the current task"""
 
-    solution = [exercise_pointer + '\n']
+    print(exercise_pointer)
     with open(file_path, 'r') as file:
         current_file = file.readlines()
     index = get_index(current_file, exercise_pointer)
@@ -103,6 +103,5 @@ def get_solution(file_path: str, exercise_pointer: str):
     while current_file[index - 1].startswith('#'):
         index -= 1
     while index <= safe_i or not current_file[index].startswith('#'):
-        solution.append(current_file[index])
+        print(current_file[index].strip())
         index += 1
-    return solution
