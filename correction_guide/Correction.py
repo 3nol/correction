@@ -1,6 +1,6 @@
 import os
 
-from Utility import tailing_os_sep, create_feedbacks, get_exercise_points
+from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at
 
 
 class Correction:
@@ -31,12 +31,15 @@ class Correction:
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
         tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir()]
         if os.stat(self.tmp_file).st_size == 0:
-            create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
-            print('all feedback templates generated')
-            last_name = tutti_names[0]
-            self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-            self.write_save(last_name)
-            print('initialized progress save')
+            # TODO checking if the correcting really should be started
+            test = str(input("Do you want to start with a new correction? [y/n] \n"))
+            if test == 'y':
+                create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
+                print('all feedback templates generated')
+                last_name = tutti_names[0]
+                self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+                self.write_save(last_name)
+                print('initialized progress save')
         else:
             with open(self.tmp_file, 'r') as save:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
@@ -51,10 +54,30 @@ class Correction:
             for name in tutti_names:
                 if last_name == name:
                     path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
+                    if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
+                        temp = get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
+                                            self.pointer)
+                        for line in temp:
+                            line = line.replace('\n', '')
+                            print(line)
                     # TODO correction
+                    correct = str(input('Is the solution correct? [y/n] \n'))
+                    comment = str(input('Please enter some comments\n'))
+                    (task, subtask) = self.pointer.split('.', 1)
+                    possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+                        if len(self.exercise_points[int(task) - 1]) > 1 else self.exercise_points[int(task) - 1][0]
+                    if correct == 'n':
+                        points = possible_points + 1
+                        while int(points) > possible_points:
+                            points = int(input('How many points should ' + name + ' get for this exercise?\n'
+                                               + str(possible_points) + ' are possible!\n'))
+                    else:
+                        points = possible_points
+                    insert_at(path, self.pointer, str(points), comment)
                     last_name = tutti_names[(tutti_names.index(last_name) + 1) % len(tutti_names)]
                     self.write_save(last_name)
                     # insert_at(feedback_path, '3.a', '1', 'Gut gemacht, du Esel!')
+                    # TODO circle through subtasks before going to next person
             self.increment_pointer()
             self.write_save(last_name)
 
