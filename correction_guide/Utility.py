@@ -67,9 +67,11 @@ def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> 
 
     with open(file_path, 'r') as file:
         current_file = file.readlines()
+    total = int(current_file[1][1]) + int(points)
     index = get_index(current_file, exercise_pointer)
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
+    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + str(total))
     with open(file_path, 'w') as file:
         file.writelines(current_file)
 
