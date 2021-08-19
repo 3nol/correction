@@ -25,7 +25,7 @@ class Correction:
 
     def start(self) -> None:
         """Starts the correction process by checking against the generated tmp save file,
-        if it is empty, new feedbacks are generated for that assignmend number,
+        if it is empty, new feedbacks are generated for that assignment number,
         otherwise the current progress is read from the save and restored"""
 
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
@@ -42,7 +42,7 @@ class Correction:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
         self.correction(tutti_names, last_name)
 
-    def correction(self, tutti_names: list[str], last_name: str) -> None:
+    def correction(self, tutti_names, last_name: str) -> None:
         """Does the sequential correction process by cycling through each task (and its subtasks)
         for each tutti. This means, first all ex. 01 are corrected, then all ex. 02, ...
         During that, the save file is continually updated to keep track"""
@@ -65,7 +65,8 @@ class Correction:
         (task, subtask) = self.pointer.split('.', 1)
         if subtask == '' or len(self.exercise_points[int(task) - 1]) <= ord(subtask) - 96:
             task = str(int(task) + 1)
-            subtask = 'a' if len(self.exercise_points[int(task) - 1]) > 1 else ''
+            if int(task) <= len(self.exercise_points):
+                subtask = 'a' if len(self.exercise_points[int(task) - 1]) > 1 else ''
         else:
             subtask = chr(ord(subtask) + 1)
         self.pointer = f'{task}.{subtask}'

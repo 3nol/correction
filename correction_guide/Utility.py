@@ -14,7 +14,7 @@ def tailing_os_sep(path: str, should_have_sep: bool = True) -> str:
     return path
 
 
-def get_exercise_points(ass_number: str) -> list[list[str]]:
+def get_exercise_points(ass_number: str):
     """Reads the points distribution of a given assignment number from the assignment config file"""
 
     exercise_points = []
@@ -26,7 +26,7 @@ def get_exercise_points(ass_number: str) -> list[list[str]]:
     return exercise_points
 
 
-def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_points: list[list[str]]):
+def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_points):
     """Goes through all names in the directory (except ***REMOVED***) and fills in a generated feedback file"""
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points, corrector)
@@ -38,7 +38,7 @@ def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_p
             print('generated file ' + feedback_path)
 
 
-def generate_feedback_file(ass_number: str, exercise_points: list[list[str]], corrector: str) -> list[str]:
+def generate_feedback_file(ass_number: str, exercise_points, corrector: str):
     """Does the feedback generation, using the assignment number, the exercise point distribution
     and the name of the corrector"""
 
