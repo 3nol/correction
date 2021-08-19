@@ -53,35 +53,43 @@ class Correction:
         while int(self.pointer.split('.', 1)[0]) <= len(self.exercise_points):
             for name in tutti_names:
                 if last_name == name:
-                    path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
-                    if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
-                        temp = get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
-                                            self.pointer)
-                        for line in temp:
-                            line = line.replace('\n', '')
-                            print(line)
-                        # TODO correction
-                        correct = str(input('Is the solution correct? [y/n] \n'))
-                        comment = str(input('Please enter some comments\n'))
-                        (task, subtask) = self.pointer.split('.', 1)
-                        possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
-                            if len(self.exercise_points[int(task) - 1]) > 1 else self.exercise_points[int(task) - 1][0]
-                        if correct == 'n':
-                            points = possible_points + 1
-                            while int(points) > possible_points:
-                                points = int(input('How many points should ' + name + ' get for this exercise?\n'
-                                                   + str(possible_points) + ' are possible!\n'))
+                    t = self.pointer.split('.', 1)[0]
+                    temp_pointer = self.pointer
+                    while t == self.pointer.split('.', 1)[0]:
+                        path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
+                        # checking if there is a solution -> later checking if there is
+                        # a difference to the empty solution sheet
+                        if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
+                            temp = get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
+                                                self.pointer)
+                            for line in temp:
+                                line = line.replace('\n', '')
+                                print(line)
+                            correct = str(input('Is the solution correct? [y/n] \n'))
+                            comment = str(input('Please enter some comments\n'))
+                            (task, subtask) = self.pointer.split('.', 1)
+                            possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+                                if len(self.exercise_points[int(task) - 1]) > 1 else self.exercise_points[int(task) - 1][0]
+                            if correct == 'n':
+                                points = possible_points + 1
+                                while int(points) > possible_points:
+                                    just_name = str(name).split(os.path.sep)
+                                    points = int(input('How many points should ' + just_name[len(just_name) - 1] + ' get for this exercise?\n'
+                                                       + str(possible_points) + ' are possible!\n'))
+                            else:
+                                points = possible_points
                         else:
-                            points = possible_points
-                    else:
-                        points = 0
-                        comment = 'no solution'
-                    insert_at(path, self.pointer, str(points), comment)
+                            points = 0
+                            comment = 'no solution'
+                        insert_at(path, self.pointer, str(points), comment)
+                        self.increment_pointer()
+                        self.write_save(last_name)
                     last_name = tutti_names[(tutti_names.index(last_name) + 1) % len(tutti_names)]
+                    if last_name != tutti_names[0]:
+                        self.pointer = temp_pointer
                     self.write_save(last_name)
-                    # insert_at(feedback_path, '3.a', '1', 'Gut gemacht, du Esel!')
-                    # TODO circle through subtasks before going to next person
-            self.increment_pointer()
+                        # insert_at(feedback_path, '3.a', '1', 'Gut gemacht, du Esel!')
+                        # TODO circle through subtasks before going to next person
             self.write_save(last_name)
 
     def increment_pointer(self) -> None:
