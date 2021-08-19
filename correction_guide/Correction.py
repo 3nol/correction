@@ -1,6 +1,7 @@
 import os
 
-from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at
+from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at, get_index
+from Solution import create_empty_solution
 
 
 class Correction:
@@ -62,7 +63,8 @@ class Correction:
                         path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                         # checking if there is a solution -> later checking if there is
                         # a difference to the empty solution sheet
-                        if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
+                        # if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
+                        if self.check_difference(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
                             get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
                                          self.pointer)
                             correct = str(input('Is the solution correct? [y/n] \n'))
@@ -108,3 +110,23 @@ class Correction:
 
         with open(self.tmp_file, 'w') as save:
             save.write(last_name + ' : ' + self.pointer)
+
+    def check_difference(self, filepath: str):
+        with open(filepath, 'r') as file:
+            current_file = file.readlines()
+        names = filepath.split(os.path.sep)
+        empty_solution = create_empty_solution(names[len(names) - 2], self.assignment_number)
+        index1 = get_index(current_file, self.pointer)
+        index2 = get_index(empty_solution, self.pointer)
+        safe1 = index1
+        while index1 >= 0 and current_file[index1 - 1].startswith('#'):
+            index1 -= 1
+        while index2 >= 0 and empty_solution[index2 - 1].startswith('#'):
+            index2 -= 1
+        while index1 < len(current_file) and (index1 <= safe1 or not current_file[index1].startswith('#')):
+            if current_file[index1] != empty_solution[index2]:
+                return True
+            else:
+                index1 += 1
+                index2 += 1
+        return False
