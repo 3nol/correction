@@ -1,3 +1,4 @@
 paramiko
 pyparsing
 jellyfish
+mysql-connector-python

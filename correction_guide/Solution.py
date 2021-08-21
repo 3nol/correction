@@ -1,6 +1,8 @@
 import os
+
+from Paths import source_path
 from Utility import get_exercise_points, tailing_os_sep
-from Private import source_path
+
 
 # to generate empty solutions for every student
 

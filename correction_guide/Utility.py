@@ -1,8 +1,7 @@
 import ast
 import os
-import re
 
-from Private import config_path
+from Paths import config_path
 
 
 def tailing_os_sep(path: str, should_have_sep: bool = True) -> str:
@@ -17,7 +16,6 @@ def tailing_os_sep(path: str, should_have_sep: bool = True) -> str:
 
 def get_exercise_points(ass_number: str):
     """Reads the points distribution of a given assignment number from the assignment config file"""
-
     exercise_points = []
     with open(config_path + 'assignment_config.txt', 'r') as file:
         for line in file.readlines():
