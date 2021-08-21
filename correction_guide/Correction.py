@@ -1,7 +1,7 @@
 import os
 
-from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at, get_index
 from Solution import create_empty_solution
+from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at, get_index
 
 
 class Correction:
@@ -19,6 +19,7 @@ class Correction:
         self.corrector = corrector
         self.pointer = ''
         self.exercise_points = get_exercise_points(self.assignment_number)
+        self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir()]
         self.tmp_file = f'{tailing_os_sep(file_path, True)}correct_tmp.txt'
         if not os.path.isfile(self.tmp_file):
             with open(self.tmp_file, 'w') as file:
@@ -30,32 +31,32 @@ class Correction:
         otherwise the current progress is read from the save and restored"""
 
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
-        tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir()]
+
         if os.stat(self.tmp_file).st_size == 0:
             # TODO checking if the correcting really should be started
             test = str(input("Do you want to start with a new correction? [y/n] \n"))
             if test == 'y':
                 create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
                 print('all feedback templates generated')
-                last_name = tutti_names[0]
+                last_name = self.tutti_names[0]
                 self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
                 self.write_save(last_name)
                 print('initialized progress save')
         else:
             with open(self.tmp_file, 'r') as save:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
-        self.correction(tutti_names, last_name)
+        self.correction(last_name)
 
-    def correction(self, tutti_names, last_name: str) -> None:
+    def correction(self, last_name: str) -> None:
         """Does the sequential correction process by cycling through each task (and its subtasks)
         for each tutti. This means, first all ex. 01 are corrected, then all ex. 02, ...
         During that, the save file is continually updated to keep track"""
 
         while int(self.pointer.split('.', 1)[0]) <= len(self.exercise_points):
-            for name in tutti_names:
+            for name in self.tutti_names:
                 if last_name == name:
-                    just_name = str(name).split(os.path.sep)
-                    print(just_name[len(just_name) - 1])
+                    just_name = str(name).rsplit(os.path.sep, 1)[1]
+                    print(just_name)
                     t = self.pointer.split('.', 1)[0]
                     # saving the pointer for the next person
                     temp_pointer = self.pointer
@@ -76,8 +77,7 @@ class Correction:
                             if correct == 'n':
                                 points = possible_points + 1
                                 while int(points) > possible_points:
-                                    points = int(input('How many points should ' + just_name[
-                                        len(just_name) - 1] + ' get for this exercise?\n'
+                                    points = int(input('How many points should ' + just_name + ' get for this exercise?\n'
                                                        + str(possible_points) + ' are possible!\n'))
                             else:
                                 points = possible_points
@@ -87,8 +87,8 @@ class Correction:
                         insert_at(path, self.pointer, str(points), comment)
                         self.increment_pointer()
                         self.write_save(last_name)
-                    last_name = tutti_names[(tutti_names.index(last_name) + 1) % len(tutti_names)]
-                    if last_name != tutti_names[0]:
+                    last_name = self.tutti_names[(self.tutti_names.index(last_name) + 1) % len(self.tutti_names)]
+                    if last_name != self.tutti_names[0]:
                         self.pointer = temp_pointer
                     self.write_save(last_name)
 

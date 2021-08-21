@@ -114,5 +114,5 @@ class CSVHandler:
 
     def create_backup(self):
         """Backups the file because we are smart"""
-        shutil.copyfile(self.file_path, f"""{'.'.join(self.file_path.split('.')[0:-1])}_{str(datetime.datetime.now()).replace(":", "_").replace("-", "_").split(".")[0]}.{self.file_path.split('.')[-1]}""".replace(" ", ''))
+        shutil.copyfile(self.file_path, f"""{'.'.join(self.file_path.split('.')[0:-1])}_{str(datetime.datetime.now()).replace(":", "_").replace("-", "_").split(".")[0]}.{self.file_path.split('.')[-1]}""")
         # one has to admire this line of code above
