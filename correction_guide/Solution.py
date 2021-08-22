@@ -4,7 +4,7 @@ from Paths import source_path
 from Utility import get_exercise_points, tailing_os_sep
 
 
-def generate_all_solution_templates(ass_number : str):
+def generate_all_solution_templates(ass_number: str):
     """Generates an empty solution for every student"""
 
     ending = '.txt'
@@ -32,7 +32,7 @@ def create_empty_solution(student: str, number: str):
         if len(exercise) > 1:
             lines.append('# Task ' + str(task_counter) + ':\n')
             subtask_counter = 'a'
-            for subtask in exercise:
+            for _ in exercise:
                 lines.append('#\n')
                 lines.append('# ' + subtask_counter + ')\n')
                 lines.append('\n')

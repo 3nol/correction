@@ -66,7 +66,7 @@ def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> 
 
     with open(file_path, 'r') as file:
         current_file = file.readlines()
-    total = int(current_file[1][1]) + int(points)
+    total = float(current_file[1][1:].split('/', 1)[0]) + float(points)
     index = get_index(current_file, exercise_pointer)
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
@@ -103,6 +103,6 @@ def get_solution(file_path: str, exercise_pointer: str):
     safe_i = index
     while current_file[index - 1].startswith('#'):
         index -= 1
-    while index <= safe_i or not current_file[index].startswith('#'):
+    while index <= safe_i or (index < len(current_file) and not current_file[index].startswith('#')):
         print(current_file[index].strip())
         index += 1
