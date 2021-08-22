@@ -32,15 +32,17 @@ class Correction:
 
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
         if os.stat(self.tmp_file).st_size == 0:
-            # TODO checking if the correcting really should be started
-            test = str(input("Do you want to start with a new correction? [y/n] \n"))
-            if test == 'y':
+            verify = str(input(f"Do you want to start with a new correction of {self.assignment_number}? [y/n] \n"))
+            if verify == 'y':
                 create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
                 print('all feedback templates generated')
                 last_name = self.tutti_names[0]
                 self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
                 self.write_save(last_name)
                 print('initialized progress save')
+            else:
+                print('no correct_tmp.txt was found!')
+                exit(1)
         else:
             with open(self.tmp_file, 'r') as save:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
@@ -59,7 +61,7 @@ class Correction:
             for name in self.tutti_names:
                 if last_name == name:
                     just_name = str(name).rsplit(os.path.sep, 1)[1]
-                    print(just_name)
+                    print('\n-------- ' + just_name + ' --------\n')
                     t = self.pointer.split('.', 1)[0]
                     # saving the pointer for the next person
                     temp_pointer = self.pointer
@@ -77,8 +79,9 @@ class Correction:
                                 self.exercise_points[int(task) - 1][0]
                             if str(input('Is the solution correct? [y/n] \n')) == 'n':
                                 while True:
-                                    points = float(input('How many points should ' + just_name + ' get for this exercise?\n'
-                                                       + str(possible_points) + ' are possible!\n'))
+                                    points = float(
+                                        input('How many points should ' + just_name + ' get for this exercise?\n'
+                                              + str(possible_points) + ' are possible!\n'))
                                     if 0.0 <= points <= possible_points:
                                         break
                             else:
@@ -112,6 +115,7 @@ class Correction:
 
         with open(self.tmp_file, 'w') as save:
             save.write(last_name + ' : ' + self.pointer)
+        # TODO update total points in database
 
     def solution_exists(self, filepath: str):
         """ Checking if the person made the exercise which means there is a different to the empty
