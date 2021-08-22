@@ -1,10 +1,11 @@
 import ast
 import os
 
+from DB import *
 from Paths import config_path
 
 
-def tailing_os_sep(path: str, should_have_sep: bool = True) -> str:
+def tailing_os_sep(path: str, should_have_sep: bool = True):
     """Small helper function that ensures that there is or is not a tailing path separator"""
 
     if path[-1] != os.sep and should_have_sep:
@@ -60,7 +61,7 @@ def generate_feedback_file(ass_number: str, exercise_points, corrector: str):
     return lines
 
 
-def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> None:
+def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str):
     """Method to edit/ fill in the correction into a pre-generated feedback file.
     This includes the points and a text for a given exercise."""
 
@@ -75,9 +76,14 @@ def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> 
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
     with open(file_path, 'w') as file:
         file.writelines(current_file)
+    return total
 
 
-def get_index(current_file, exercise_pointer: str) -> int:
+def insert_in_db(student_name: str, ass_number: str, total_points: str):
+    sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
+
+
+def get_index(current_file, exercise_pointer: str):
     """Method to get the start index of an exercise in the feedback or solution file"""
 
     index: int = 0

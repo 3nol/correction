@@ -1,7 +1,11 @@
-import os
-
 from Solution import create_empty_solution
-from Utility import tailing_os_sep, create_feedbacks, get_exercise_points, get_solution, insert_at, get_index
+from Utility import *
+
+
+def init_tutti_names(names: list):
+    for name in names:
+        sql_query(f"INSERT INTO points_table (student_name) VALUES ('{name}')")
+        print('inserted tutti:', name)
 
 
 class Correction:
@@ -11,7 +15,7 @@ class Correction:
     - Correction-process: sequential go-through of exercises of all tuttis
     A progress save file is written to the filepath/correct_tmp.txt"""
 
-    def __init__(self, file_path: str, assignment_number: str, corrector: str) -> None:
+    def __init__(self, file_path: str, assignment_number: str, corrector: str):
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.file_path = file_path
@@ -25,7 +29,10 @@ class Correction:
             with open(self.tmp_file, 'w') as file:
                 file.write('')
 
-    def start(self) -> None:
+    def get_just_names(self):
+        return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.tutti_names))
+
+    def start(self):
         """Starts the correction process by checking against the generated tmp save file,
         if it is empty, new feedbacks are generated for that assignment number,
         otherwise the current progress is read from the save and restored"""
@@ -48,16 +55,12 @@ class Correction:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
         self.correction(last_name)
 
-    def correction(self, last_name: str) -> None:
+    def correction(self, last_name: str):
         """Does the sequential correction process by cycling through each task (and its subtasks)
         for each tutti. This means, first all ex. 01 are corrected, then all ex. 02, ...
         During that, the save file is continually updated to keep track"""
 
         while int(self.pointer.split('.', 1)[0]) <= len(self.exercise_points):
-
-            # TODO: update every given point in database
-            # TODO: update total points in exercise (maybe use DB to get?)
-
             for name in self.tutti_names:
                 if last_name == name:
                     just_name = str(name).rsplit(os.path.sep, 1)[1]
@@ -89,7 +92,8 @@ class Correction:
                         else:
                             points = 0
                             comment = 'no solution'
-                        insert_at(path, self.pointer, str(points), comment)
+                        new_total_points = insert_in_file(path, self.pointer, str(points), comment)
+                        insert_in_db(just_name, self.assignment_number, new_total_points)
                         self.increment_pointer()
                         self.write_save(last_name)
                     last_name = self.tutti_names[(self.tutti_names.index(last_name) + 1) % len(self.tutti_names)]
@@ -97,7 +101,7 @@ class Correction:
                         self.pointer = temp_pointer
                     self.write_save(last_name)
 
-    def increment_pointer(self) -> None:
+    def increment_pointer(self):
         """Increments the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
         1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3."""
 
@@ -110,12 +114,12 @@ class Correction:
             subtask = chr(ord(subtask) + 1)
         self.pointer = f'{task}.{subtask}'
 
-    def write_save(self, last_name: str) -> None:
+    def write_save(self, last_name: str):
         """Save the last_name edited as well as the progress points to the save file"""
 
         with open(self.tmp_file, 'w') as save:
             save.write(last_name + ' : ' + self.pointer)
-        # TODO update total points in database
+        update_db()
 
     def solution_exists(self, filepath: str):
         """ Checking if the person made the exercise which means there is a different to the empty
