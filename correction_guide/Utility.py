@@ -66,17 +66,19 @@ def insert_at(file_path: str, exercise_pointer: str, points: str, text: str) -> 
 
     with open(file_path, 'r') as file:
         current_file = file.readlines()
-    total = float(current_file[1][1:].split('/', 1)[0]) + float(points)
+    # preparing point amounts
+    total = str(float(current_file[1][1:].split('/', 1)[0]) + float(points)).split('.0', 1)[0]
+    points = points.split('.0', 1)[0]
     index = get_index(current_file, exercise_pointer)
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
-    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + str(total))
+    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
     with open(file_path, 'w') as file:
         file.writelines(current_file)
 
 
 def get_index(current_file, exercise_pointer: str) -> int:
-    """ Method to get the start index of an exercise in the feedback or solution file"""
+    """Method to get the start index of an exercise in the feedback or solution file"""
 
     index: int = 0
     (task, subtask) = exercise_pointer.split('.', 1)
