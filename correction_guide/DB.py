@@ -2,6 +2,9 @@ import mysql.connector
 
 
 def sql_query(query: str):
+    """Executes an SQL query on the mariaDB database of this project,
+    returns all fetched result attributes"""
+
     result = []
     try:
         con = mysql.connector.connect(

@@ -31,7 +31,6 @@ class Correction:
         otherwise the current progress is read from the save and restored"""
 
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
-
         if os.stat(self.tmp_file).st_size == 0:
             # TODO checking if the correcting really should be started
             test = str(input("Do you want to start with a new correction? [y/n] \n"))
@@ -53,6 +52,10 @@ class Correction:
         During that, the save file is continually updated to keep track"""
 
         while int(self.pointer.split('.', 1)[0]) <= len(self.exercise_points):
+
+            # TODO: update every given point in database
+            # TODO: update total points in exercise (maybe use DB to get?)
+
             for name in self.tutti_names:
                 if last_name == name:
                     just_name = str(name).rsplit(os.path.sep, 1)[1]
@@ -64,21 +67,20 @@ class Correction:
                         path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                         # checking if there is a solution -> later checking if there is
                         # a difference to the empty solution sheet
-                        # if os.path.isfile(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
-                        if self.check_difference(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
+                        if self.solution_exists(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
                             get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
                                          self.pointer)
-                            correct = str(input('Is the solution correct? [y/n] \n'))
                             comment = str(input('Please enter some comments\n'))
                             (task, subtask) = self.pointer.split('.', 1)
                             possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
                                 if len(self.exercise_points[int(task) - 1]) > 1 else \
                                 self.exercise_points[int(task) - 1][0]
-                            if correct == 'n':
-                                points = possible_points + 1
-                                while int(points) > possible_points:
-                                    points = int(input('How many points should ' + just_name + ' get for this exercise?\n'
+                            if str(input('Is the solution correct? [y/n] \n')) == 'n':
+                                while True:
+                                    points = float(input('How many points should ' + just_name + ' get for this exercise?\n'
                                                        + str(possible_points) + ' are possible!\n'))
+                                    if 0.0 <= points <= possible_points:
+                                        break
                             else:
                                 points = possible_points
                         else:
@@ -111,7 +113,7 @@ class Correction:
         with open(self.tmp_file, 'w') as save:
             save.write(last_name + ' : ' + self.pointer)
 
-    def check_difference(self, filepath: str):
+    def solution_exists(self, filepath: str):
         """ Checking if the person made the exercise which means there is a different to the empty
         solution from the beginning. Checking every task on it's own to minimize the correcting"""
 
