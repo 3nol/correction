@@ -1,5 +1,6 @@
 import ast
 import os
+import re
 
 from DB import *
 from Paths import config_path
@@ -88,11 +89,11 @@ def get_index(current_file, exercise_pointer: str):
 
     index: int = 0
     (task, subtask) = exercise_pointer.split('.', 1)
-    match = 'Task ' + task
+    match = task
     for line in current_file:
-        if line.startswith('# ' + match) or line.startswith(match):
-            if match != subtask + ')' and subtask != '':
-                match = subtask + ')'
+        if re.match('#?.*' + match + '[:.)]', line):
+            if match != subtask and subtask != '':
+                match = subtask
             else:
                 break
         index += 1
