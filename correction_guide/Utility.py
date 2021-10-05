@@ -5,6 +5,10 @@ import re
 from DB import *
 from Paths import config_path
 
+taskString = ['Task', 'task', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesung', 'loesung', 'Solution', 'solution',
+              'Exercise', 'exercise', 'Ex\.?', 'ex\.?', 'Number', 'number', 'No\.?', 'no\.?', 'Nummer', 'nummer', 'Nr\.?',
+              'nr\.?']
+
 
 def tailing_os_sep(path: str, should_have_sep: bool = True):
     """Small helper function that ensures that there is or is not a tailing path separator"""
@@ -89,14 +93,16 @@ def get_index(current_file, exercise_pointer: str):
 
     index: int = 0
     (task, subtask) = exercise_pointer.split('.', 1)
-    match = task
+    match = '(' + '|'.join(taskString) + ')? *' + task
     for line in current_file:
-        if re.match('#?.*' + match + '[:.)]', line):
+        if re.match('^#? *' + match + ' *[:.)].*', line):
             if match != subtask and subtask != '':
-                match = subtask
+                match = '(' + subtask + '|' + str(subtask).upper() + ')'
             else:
                 break
         index += 1
+    if index == len(current_file) - 1:
+        index = -1
     return index
 
 
@@ -109,9 +115,9 @@ def get_solution(file_path: str, exercise_pointer: str):
     with open(file_path, 'r') as file:
         current_file = file.readlines()
     index = get_index(current_file, exercise_pointer)
-    safe_i = index
-    while current_file[index - 1].startswith('#'):
-        index -= 1
-    while index <= safe_i or (index < len(current_file) and not current_file[index].startswith('#')):
+    print(current_file[index].strip())
+    index += 1
+    while index < len(current_file) and not re.match('^#? *(((' + '|'.join(taskString) + ')? *[1-9])|[a-hA-H]) *[:.)].*',
+                                                     current_file[index]):
         print(current_file[index].strip())
         index += 1
