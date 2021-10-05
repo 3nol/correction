@@ -132,6 +132,8 @@ class Correction:
         index1 = get_index(current_file, self.pointer)
         index2 = get_index(empty_solution, self.pointer)
         safe1 = index1
+        if index1 == -1:
+            return False
         while index1 >= 0 and current_file[index1 - 1].startswith('#'):
             index1 -= 1
         while index2 >= 0 and empty_solution[index2 - 1].startswith('#'):

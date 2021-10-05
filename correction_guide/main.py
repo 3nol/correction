@@ -1,5 +1,6 @@
 from Correction import Correction
 from Paths import source_path
+import Solution
 
 if __name__ == '__main__':
 

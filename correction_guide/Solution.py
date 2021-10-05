@@ -24,21 +24,19 @@ def create_empty_solution(student: str, number: str):
     assigment number by using the assignment_config.txt"""
 
     exercise_points = get_exercise_points(number)
-    lines = ['# Assignment ' + number + '\n', '# ' + student + '\n', '#\n']
+    lines = ['# Assignment ' + number + '\n', '# ' + student + '\n', '\n']
     task_counter = 1
     for exercise in exercise_points:
-        lines.append('#\n')
-        lines.append('#\n')
+        lines.append('\n')
         if len(exercise) > 1:
-            lines.append('# Task ' + str(task_counter) + ':\n')
+            lines.append('Task ' + str(task_counter) + ':\n')
             subtask_counter = 'a'
             for _ in exercise:
-                lines.append('#\n')
-                lines.append('# ' + subtask_counter + ')\n')
+                lines.append('' + subtask_counter + ')\n')
                 lines.append('\n')
                 subtask_counter = chr(ord(subtask_counter) + 1)
         else:
-            lines.append('# Task ' + str(task_counter) + ':\n')
+            lines.append('Task ' + str(task_counter) + ':\n')
         lines.append('\n')
         task_counter += 1
     return lines
