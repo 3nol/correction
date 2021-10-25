@@ -101,7 +101,7 @@ def get_index(current_file, exercise_pointer: str):
             else:
                 break
         index += 1
-    if index == len(current_file) - 1:
+    if index == len(current_file):
         index = -1
     return index
 

@@ -122,26 +122,8 @@ class Correction:
         update_db()
 
     def solution_exists(self, filepath: str):
-        """ Checking if the person made the exercise which means there is a different to the empty
-        solution from the beginning. Checking every task on it's own to minimize the correcting"""
+        """ Checking if the person made the exercise which means there is a exercise for the current pointer"""
 
         with open(filepath, 'r') as file:
             current_file = file.readlines()
-        names = filepath.split(os.path.sep)
-        empty_solution = create_empty_solution(names[len(names) - 2], self.assignment_number)
-        index1 = get_index(current_file, self.pointer)
-        index2 = get_index(empty_solution, self.pointer)
-        safe1 = index1
-        if index1 == -1:
-            return False
-        while index1 >= 0 and current_file[index1 - 1].startswith('#'):
-            index1 -= 1
-        while index2 >= 0 and empty_solution[index2 - 1].startswith('#'):
-            index2 -= 1
-        while index1 < len(current_file) and (index1 <= safe1 or not current_file[index1].startswith('#')):
-            if current_file[index1] != empty_solution[index2]:
-                return True
-            else:
-                index1 += 1
-                index2 += 1
-        return False
+        return get_index(current_file, self.pointer) > 0
