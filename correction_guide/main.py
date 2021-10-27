@@ -1,7 +1,7 @@
-from Correction import Correction
+from Correction import Correction, init_tutti_names
 from Paths import source_path
+from Utility import check_internet_connection
 
 if __name__ == '__main__':
-    print('Python interpreter is still working')
     # init_tutti_names(['***REMOVED***', '***REMOVED***', '***REMOVED***'])
-    # Correction(source_path, '01', '***REMOVED*** ***REMOVED***').setup()
+    Correction(source_path, '01', '***REMOVED*** ***REMOVED***').setup()

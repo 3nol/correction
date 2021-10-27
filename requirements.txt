@@ -1,4 +1,2 @@
-paramiko
-pyparsing
-jellyfish
+requests
 mysql-connector-python

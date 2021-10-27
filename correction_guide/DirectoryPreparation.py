@@ -1,9 +1,46 @@
 import os
-from Utility import tailing_os_sep
+import re
+from glob import glob
+from Utility import trailing_os_sep
 
 
-def extract_solutions():
-    print('not implemented yet')
+def extract_solutions(ass_number: str, tutti_names: list):
+    solution_files = find_solution_files(ass_number, tutti_names)
+    for student_name in solution_files:
+        solution_content = []
+        for file in solution_files[student_name]:
+            with open(file, 'r') as f:
+                solution_content.extend(f.readlines())
+            solution_content.append('\n')
+        with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt', 'w') as f:
+            f.writelines(solution_content)
+
+
+def find_solution_files(ass_number: str, tutti_names: list) -> dict:
+    tutti_solutions = {}
+    for name in tutti_names:
+        potential_folders = [f for f in glob(f'{trailing_os_sep(name)}assignments{os.path.sep}'
+                                             f'*{str(int(ass_number))}*') if os.path.isdir(f)]
+        solutions_files = []
+        if len(potential_folders) > 0:
+            if len(potential_folders) > 1:
+                print('INFO: multiple solutions folders for', name)
+                for folder in potential_folders:
+                    print(potential_folders.index(folder), folder)
+                i = -1
+                while not 0 <= i < len(potential_folders):
+                    index = input('Input the index for the correct folder: ')
+                    if re.match('\d+', index):
+                        i = int(index)
+            else:
+                i = 0
+
+            for path, _, file_list in os.walk(potential_folders[i]):
+                solutions_files.extend(map(lambda file: trailing_os_sep(path) + file, file_list))
+        else:
+            print('INFO: no solutions by', name)
+        tutti_solutions[name] = solutions_files
+    return tutti_solutions
 
 
 def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_points):
@@ -12,7 +49,7 @@ def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_p
     empty_feedback = generate_feedback_file(ass_number, exercise_points, corrector)
     for name in [f.path for f in os.scandir(file_path) if f.is_dir()]:
         if '***REMOVED***' not in name:
-            feedback_path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt'
+            feedback_path = f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt'
             with open(feedback_path, 'w') as file:
                 file.writelines(empty_feedback)
             print('generated file ' + feedback_path)
