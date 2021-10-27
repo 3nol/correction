@@ -1,4 +1,4 @@
-from DirectoryPreparation import create_feedbacks
+from DirectoryPreparation import extract_solutions, create_feedbacks
 from Utility import *
 
 
@@ -21,13 +21,14 @@ class Correction:
         self.file_path = file_path
         self.assignment_number = assignment_number
         self.corrector = corrector
+        self.offline = not check_internet_connection()
         self.pointer = ''
         # getting points distribution from config file 'assignment_config.txt'
-        self.exercise_points = get_exercise_points(self.assignment_number)
+        self.exercise_points = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
         self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir()]
         # laying out path to temporary progress save in 'correct_tmp.txt'
-        self.tmp_file = f'{tailing_os_sep(file_path, True)}correct_tmp.txt'
+        self.tmp_file = f'{trailing_os_sep(file_path, True)}correct_tmp.txt'
         if not os.path.isfile(self.tmp_file):
             with open(self.tmp_file, 'w') as file:
                 file.write('')  # if file not exists, create a new one -> NEW correction
@@ -45,6 +46,8 @@ class Correction:
             # 'correct_tmp.txt' is empty -> asking whether a new correction should be initialized
             verify = str(input(f"Do you want to start with a new correction of {self.assignment_number}? [y/n] \n"))
             if verify == 'y':
+                # extract all solution files to one file per student
+                extract_solutions(self.assignment_number, self.tutti_names)
                 # create templates for feedbacks in every attendant's directory
                 create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
                 print('all feedback templates generated')
@@ -57,7 +60,10 @@ class Correction:
                 print('no correct_tmp.txt was found!')
                 exit(1)
         else:
-            # otherwise, restart correction from last session based on 'correct_tmp.txt'
+            # otherwise, sync previous progress if internet is available
+            if not self.offline:
+                self.sync_all_feedbacks()
+            # then, restart correction from last session based on 'correct_tmp.txt'
             with open(self.tmp_file, 'r') as save:
                 (last_name, self.pointer) = save.readline().split(' : ', 1)
         self.start_correction(last_name)
@@ -80,12 +86,12 @@ class Correction:
                     temp_pointer = self.pointer
                     # go through all subtasks 1.X
                     while t == self.pointer.split('.', 1)[0]:
-                        path = f'{tailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
+                        path = f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                         # checking if there is a solution -> later checking if there is
                         # a difference to the empty solution sheet
-                        if self.solution_exists(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt'):
-                            get_solution(f'{tailing_os_sep(name, True)}assignment{self.assignment_number}.txt',
-                                         self.pointer)
+                        solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment{self.assignment_number}.txt'
+                        if self.solution_exists(solution_path):
+                            get_solution(solution_path, self.pointer, self.exercise_points)
                             comment = str(input('Please enter some comments (without newlines!)\n'))
                             (task, subtask) = self.pointer.split('.', 1)
                             # get the maximum possible points for this exercise, either from the subtask or main task
@@ -109,9 +115,10 @@ class Correction:
                             comment = 'no solution'
                         # write task correction to feedback file and to database
                         new_total_points = insert_in_file(path, self.pointer, str(points), comment)
-                        insert_in_db(just_name, self.assignment_number, new_total_points)
+                        if not self.offline:
+                            insert_in_db(just_name, self.assignment_number, new_total_points)
                         # count to next task and save
-                        self.increment_pointer()
+                        self.pointer = increment_pointer(self.pointer, self.exercise_points)
                         self.write_save(last_name)
                     last_name = self.tutti_names[(self.tutti_names.index(last_name) + 1) % len(self.tutti_names)]
                     # continue as long as where not back at the first student
@@ -119,27 +126,13 @@ class Correction:
                         self.pointer = temp_pointer
                     self.write_save(last_name)
 
-    def increment_pointer(self):
-        """Increments the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
-        1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3."""
-
-        (task, subtask) = self.pointer.split('.', 1)
-        # increment main task when there were no subtasks before or all previous subtasks are done
-        if subtask == '' or len(self.exercise_points[int(task) - 1]) <= ord(subtask) - 96:
-            task = str(int(task) + 1)
-            if int(task) <= len(self.exercise_points):
-                subtask = 'a' if len(self.exercise_points[int(task) - 1]) > 1 else ''
-        # increment just subtask
-        else:
-            subtask = chr(ord(subtask) + 1)
-        self.pointer = f'{task}.{subtask}'
-
     def write_save(self, last_name: str):
         """Save the last_name edited as well as the progress points to the save file"""
 
         with open(self.tmp_file, 'w') as save:
             save.write(last_name + ' : ' + self.pointer)
-        update_db()
+        if not self.offline:
+            update_db()
 
     def solution_exists(self, filepath: str):
         """ Checking if the person made the exercise which means there is a exercise for the current pointer"""
@@ -147,3 +140,13 @@ class Correction:
         with open(filepath, 'r') as file:
             current_file = file.readlines()
         return get_index(current_file, self.pointer) > 0
+
+    def sync_all_feedbacks(self):
+        if not self.offline:
+            for name in self.tutti_names:
+                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt') as f:
+                    insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
+                                 str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
+            update_db()
+        else:
+            print('ERROR: you have to be online to sync all feedbacks!')

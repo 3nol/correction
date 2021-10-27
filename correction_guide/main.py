@@ -1,7 +1,7 @@
-from Correction import Correction
+from Correction import Correction, init_tutti_names
 from Paths import source_path
+from Utility import check_internet_connection
 
 if __name__ == '__main__':
-    print('Python interpreter is still working')
-    # init_tutti_names(['clara_biedermann', 'jannes_mueller', 'leon_wenzler'])
-    # Correction(source_path, '01', 'Clara Biedermann').setup()
+    # init_tutti_names(['clara.biedermann', 'jannes.mueller', 'leon.wenzler'])
+    Correction(source_path, '01', 'Clara Biedermann').setup()
