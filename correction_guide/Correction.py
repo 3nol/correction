@@ -26,7 +26,7 @@ class Correction:
         # getting points distribution from config file 'assignment_config.txt'
         self.exercise_points = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
-        self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir()]
+        self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
         # laying out path to temporary progress save in 'correct_tmp.txt'
         self.tmp_file = f'{trailing_os_sep(file_path, True)}correct_tmp.txt'
         if not os.path.isfile(self.tmp_file):
