@@ -1,19 +1,34 @@
 import os
 import re
 from glob import glob
+
 from Utility import trailing_os_sep
 
 
-def extract_solutions(ass_number: str, tutti_names: list):
+def extract_solutions(ass_number: str, tutti_names: list) -> list:
+    """ method extracting the solutions of the students. Returning a list containing the students who already
+    have been corrected in some parts."""
     solution_files = find_solution_files(ass_number, tutti_names)
+    corrected_students = []
     for student_name in solution_files:
         solution_content = []
+        old_concatenated_solution = []
+        # saving the old file to check for changes
+        if os.path.exists(
+                f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt'):
+            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
+                    'r') as f:
+                old_concatenated_solution.extend(f.readlines())
         for file in solution_files[student_name]:
             with open(file, 'r') as f:
                 solution_content.extend(f.readlines())
             solution_content.append('\n')
-        with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt', 'w') as f:
-            f.writelines(solution_content)
+        # if there is no difference between the old solution and the new one
+        if solution_content == old_concatenated_solution:
+            corrected_students.append(student_name)
+        else:
+            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt', 'w') as f:
+                f.writelines(solution_content)
 
 
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
