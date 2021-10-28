@@ -12,23 +12,27 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
     corrected_students = []
     for student_name in solution_files:
         solution_content = []
-        old_concatenated_solution = []
+        old_concatenated_solution = ''
         # saving the old file to check for changes
         if os.path.exists(
                 f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt'):
-            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
+            with open(
+                    f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
                     'r') as f:
-                old_concatenated_solution.extend(f.readlines())
+                old_concatenated_solution = f.readlines()
         for file in solution_files[student_name]:
             with open(file, 'r') as f:
                 solution_content.extend(f.readlines())
             solution_content.append('\n')
         # if there is no difference between the old solution and the new one
-        if solution_content == old_concatenated_solution:
+        if "".join(solution_content) == "".join(old_concatenated_solution):
             corrected_students.append(student_name)
         else:
-            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt', 'w') as f:
+            with open(
+                    f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
+                    'w') as f:
                 f.writelines(solution_content)
+    return corrected_students
 
 
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
@@ -58,16 +62,14 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
     return tutti_solutions
 
 
-def create_feedbacks(file_path: str, ass_number: str, corrector: str, exercise_points):
+def create_feedback(file_path: str, ass_number: str, corrector: str, exercise_points):
     """Goes through all names in the directory (except ***REMOVED***) and fills in a generated feedback file"""
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points, corrector)
-    for name in [f.path for f in os.scandir(file_path) if f.is_dir()]:
-        if '***REMOVED***' not in name:
-            feedback_path = f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt'
-            with open(feedback_path, 'w') as file:
-                file.writelines(empty_feedback)
-            print('generated file ' + feedback_path)
+    feedback_path = f'{trailing_os_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
+    with open(feedback_path, 'w') as file:
+        file.writelines(empty_feedback)
+    print('generated file ' + feedback_path)
 
 
 def generate_feedback_file(ass_number: str, exercise_points, corrector: str):
@@ -90,7 +92,6 @@ def generate_feedback_file(ass_number: str, exercise_points, corrector: str):
         lines.append('\n')
         task_counter += 1
     return lines
-
 
 # def generate_all_solution_templates(ass_number: str):
 #     """Generates an empty solution for every student"""
