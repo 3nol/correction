@@ -5,6 +5,7 @@ import requests
 from DB import *
 from Paths import config_path
 
+
 taskString = ['Task', 'task', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesung', 'loesung', 'Solution', 'solution',
               'Exercise', 'exercise', r'Ex\.?', r'ex\.?', 'Number', 'number', r'No\.?', r'no\.?', 'Nummer', 'nummer',
               r'Nr\.?', r'nr\.?']
