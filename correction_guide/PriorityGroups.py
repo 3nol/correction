@@ -1,6 +1,7 @@
-from Utility import increment_pointer
+from Utility import increment_pointer, trailing_os_sep, get_index
 from Paths import config_path
 import ast
+import os
 
 
 class PriorityGroups:
@@ -9,12 +10,12 @@ class PriorityGroups:
         self.exercise_points = self.get_task_distribution(ass_number)
         self.pointer = ''
         i = 1
-        for maintask in self.exercise_points:
-            if len(maintask) == 1:
+        for main_task in self.exercise_points:
+            if len(main_task) == 1:
                 self.groups[f'{i}.'] = []
             else:
                 j = 'a'
-                for subtask in maintask:
+                for subtask in main_task:
                     self.groups[f'{i}.{j}'] = []
                     j = chr(ord(j) + 1)
 
@@ -29,7 +30,9 @@ class PriorityGroups:
     def pop_smallest(self) -> list:
         values = self.peek_smallest()
         self.groups[self.pointer] = []
-        self.pointer = increment_pointer(self.pointer, self.exercise_points)
+        # incrementing the pointer to the next not empty task
+        while not self.groups[self.pointer]:
+            self.pointer = increment_pointer(self.pointer, self.exercise_points)
         return values
 
     def get_task_distribution(self, ass_number: str):
@@ -42,3 +45,20 @@ class PriorityGroups:
                     for exercise in line.strip().split(' : ', 1)[1].split(', '):
                         exercise_points.append(ast.literal_eval(exercise))
         return exercise_points
+
+    def get_exercise_pointer_from_feedback(self, student_name: str, ass_number: str):
+        pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+        feedback = []
+        with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt',
+                  'r') as f:
+            feedback.append(f.readlines())
+        while True:
+            # already finished with correction of this student
+            if get_index(feedback, pointer) == -1:
+                return -1
+            # there is no correction for this pointer in the feedback
+            elif feedback[get_index(feedback, pointer) + 1] != '\n':
+                return pointer
+            else:
+                pointer = increment_pointer(pointer, self.exercise_points)
+

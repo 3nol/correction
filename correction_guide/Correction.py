@@ -1,5 +1,6 @@
 from DirectoryPreparation import extract_solutions, create_feedbacks
 from Utility import *
+from PriorityGroups import PriorityGroups
 
 
 def init_tutti_names(names: list):
@@ -22,16 +23,17 @@ class Correction:
         self.assignment_number = assignment_number
         self.corrector = corrector
         self.offline = not check_internet_connection()
-        self.pointer = ''
+        self.task_queue = PriorityGroups(assignment_number)
+        # self.pointer = ''
         # getting points distribution from config file 'assignment_config.txt'
         self.exercise_points = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
         self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
         # laying out path to temporary progress save in 'correct_tmp.txt'
-        self.tmp_file = f'{trailing_os_sep(file_path, True)}correct_tmp.txt'
-        if not os.path.isfile(self.tmp_file):
-            with open(self.tmp_file, 'w') as file:
-                file.write('')  # if file not exists, create a new one -> NEW correction
+        # self.tmp_file = f'{trailing_os_sep(file_path, True)}correct_tmp.txt'
+        # if not os.path.isfile(self.tmp_file):
+        #    with open(self.tmp_file, 'w') as file:
+        #        file.write('')  # if file not exists, create a new one -> NEW correction
 
     def get_just_names(self):
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.tutti_names))
@@ -47,14 +49,26 @@ class Correction:
             verify = str(input(f"Do you want to start with a new correction of {self.assignment_number}? [y/n] \n"))
             if verify == 'y':
                 # extract all solution files to one file per student
-                extract_solutions(self.assignment_number, self.tutti_names)
+                corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
                 # create templates for feedbacks in every attendant's directory
-                create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
-                print('all feedback templates generated')
-                last_name = self.tutti_names[0]
-                self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+                pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+                for student in self.tutti_names:
+                    # if the student has a valid correction
+                    if student in corrected_students:
+                        corrected_pointer = self.task_queue.get_exercise_pointer_from_feedback(student,
+                                                                                               self.assignment_number)
+                        # if there is still something left so correct
+                        if corrected_pointer != -1:
+                            self.task_queue.insert_at_pointer(student, corrected_pointer)
+                    # else create a new template
+                    else:
+                        create_feedbacks(self.file_path, self.assignment_number, self.corrector, self.exercise_points)
+                        print('new feedback templates generated for' + student)
+                        self.task_queue.insert_at_pointer(student, pointer)
+                # last_name = self.tutti_names[0]
+                # self.pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
                 # writing progress to tmp file
-                self.write_save(last_name)
+                # self.write_save(last_name)
                 print('initialized progress save')
             else:
                 print('no correct_tmp.txt was found!')
