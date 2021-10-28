@@ -1,6 +1,6 @@
-from DirectoryPreparation import extract_solutions, create_feedback
-from PriorityGroups import PriorityGroups
 from Utility import *
+from PriorityGroups import PriorityGroups
+from DirectoryPreparation import extract_solutions, create_feedback
 
 
 def init_tutti_names(names: list):
@@ -23,12 +23,12 @@ class Correction:
         self.assignment_number = assignment_number
         self.corrector = corrector
         self.offline = not check_internet_connection()
+        # PriorityGroups objects to manage remaining students (to be corrected)
         self.task_queue = PriorityGroups(assignment_number)
         # getting points distribution from config file 'assignment_config.txt'
         self.exercise_points = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
         self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir() and 'johannes.fuchs' not in f.path]
-
 
     def get_just_names(self):
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.tutti_names))
@@ -48,8 +48,7 @@ class Correction:
             for student in self.tutti_names:
                 # if the student has a valid correction
                 if student in corrected_students:
-                    corrected_pointer = self.task_queue.get_exercise_pointer_from_feedback(student,
-                                                                                           self.assignment_number)
+                    corrected_pointer = self.get_exercise_pointer_from_feedback(student)
                     # if there is still something left so correct
                     if corrected_pointer != -1:
                         self.task_queue.insert_at_pointer(student, corrected_pointer)
@@ -62,11 +61,10 @@ class Correction:
         else:
             print('no correct_tmp.txt was found!')
             exit(1)
-        if self.task_queue.get_exercise_pointer() != '':
+        if self.task_queue.pointer != '':
             self.start_correction()
         else:
             print("There is no one left to correct!")
-
 
     def start_correction(self):
         """Does the sequential correction process by cycling through each task (and its subtasks)
@@ -74,21 +72,22 @@ class Correction:
         During that, the save file is continually updated to keep track"""
 
         # go through all (main) exercises X.a
-        while int(self.task_queue.get_exercise_pointer().split('.', 1)[0]) <= len(self.exercise_points):
+        while int(self.task_queue.pointer.split('.', 1)[0]) <= len(self.exercise_points):
             # go through every student in the smallest task group
             for name in self.task_queue.peek_smallest():
                 # check if it actually worked and the correct student is selected
                 just_name = str(name).rsplit(os.path.sep, 1)[1]
                 print('\n-------- ' + just_name + ' --------\n')
-                t = self.task_queue.get_exercise_pointer().split('.', 1)[0]
+                t = self.task_queue.pointer.split('.', 1)[0]
                 # saving the pointer for the next person
-                temp_pointer = self.task_queue.get_exercise_pointer()
+                temp_pointer = self.task_queue.pointer
                 # go through all subtasks 1.X
                 while t == temp_pointer.split('.', 1)[0]:
                     path = f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
                     # checking if there is a solution -> later checking if there is
                     # a difference to the empty solution sheet
-                    solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment{self.assignment_number}.txt'
+                    solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment' \
+                                    f'{self.assignment_number}.txt'
                     if self.solution_exists(solution_path):
                         get_solution(solution_path, temp_pointer, self.exercise_points)
                         comment = str(input('Please enter some comments (without newlines!)\n'))
@@ -113,30 +112,35 @@ class Correction:
                         points = 0
                         comment = 'no solution'
                     # write task correction to feedback file and to database
-                    new_total_points = insert_in_file(path, self.task_queue.get_exercise_pointer(), str(points), comment)
+                    new_total_points = insert_in_file(path, self.task_queue.pointer, str(points), comment)
                     if not self.offline:
                         insert_in_db(just_name, self.assignment_number, new_total_points)
+                        update_db()
                     # count to next task and save
                     temp_pointer = increment_pointer(temp_pointer, self.exercise_points)
-            self.task_queue.move_smallest_up()
-
-
-    def write_save(self, last_name: str):
-        """Save the last_name edited as well as the progress points to the save file"""
-
-        with open(self.tmp_file, 'w') as save:
-            save.write(last_name + ' : ' + self.pointer)
-        if not self.offline:
-            update_db()
-
+            self.task_queue.move_up_smallest()
 
     def solution_exists(self, filepath: str):
         """ Checking if the person made the exercise which means there is a exercise for the current pointer"""
 
         with open(filepath, 'r') as file:
             current_file = file.readlines()
-        return get_index(current_file, self.task_queue.get_exercise_pointer()) > 0
+        return get_index(current_file, self.task_queue.pointer) > 0
 
+    def get_exercise_pointer_from_feedback(self, student_name: str):
+        feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+        feedback = []
+        with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt', 'r') as f:
+            feedback = f.readlines()
+        while True:
+            index = get_index(feedback, feedback_pointer)
+            # already finished with correction of this student
+            if index == -1:
+                return index
+            # there is no correction for this feedback_pointer in the feedback
+            elif feedback[index + 1] == '\n':
+                return feedback_pointer
+            feedback_pointer = increment_pointer(feedback_pointer, self.exercise_points)
 
     def sync_all_feedbacks(self):
         if not self.offline:

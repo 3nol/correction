@@ -1,24 +1,22 @@
 import os
 import re
 from glob import glob
-
 from Utility import trailing_os_sep
 
 
 def extract_solutions(ass_number: str, tutti_names: list) -> list:
-    """ method extracting the solutions of the students. Returning a list containing the students who already
-    have been corrected in some parts."""
+    """Extracting the solutions of the students. Returning a list containing the students who already
+    have been corrected in some parts"""
     solution_files = find_solution_files(ass_number, tutti_names)
     corrected_students = []
     for student_name in solution_files:
         solution_content = []
         old_concatenated_solution = ''
         # saving the old file to check for changes
-        if os.path.exists(
-                f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt'):
-            with open(
-                    f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
-                    'r') as f:
+        if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+                          f'{ass_number}.txt'):
+            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+                      f'{ass_number}.txt', 'r') as f:
                 old_concatenated_solution = f.readlines()
         for file in solution_files[student_name]:
             with open(file, 'r') as f:
@@ -28,9 +26,8 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
         if "".join(solution_content) == "".join(old_concatenated_solution):
             corrected_students.append(student_name)
         else:
-            with open(
-                    f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment{ass_number}.txt',
-                    'w') as f:
+            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+                      f'{ass_number}.txt', 'w') as f:
                 f.writelines(solution_content)
     return corrected_students
 
@@ -53,7 +50,6 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                         i = int(index)
             else:
                 i = 0
-
             for path, _, file_list in os.walk(potential_folders[i]):
                 solutions_files.extend(map(lambda file: trailing_os_sep(path) + file, file_list))
         else:
