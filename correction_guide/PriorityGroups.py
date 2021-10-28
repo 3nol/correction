@@ -13,6 +13,7 @@ class PriorityGroups:
         for main_task in self.exercise_points:
             if len(main_task) == 1:
                 self.groups[f'{i}.'] = []
+                i += 1
             else:
                 j = 'a'
                 for subtask in main_task:
@@ -27,13 +28,18 @@ class PriorityGroups:
     def peek_smallest(self) -> list:
         return self.groups[self.pointer]
 
-    def pop_smallest(self) -> list:
+    def move_smallest_up(self):
         values = self.peek_smallest()
         self.groups[self.pointer] = []
+        # getting the pointer of the next main task
+        point = self.pointer
+        while point.split('.', 1) == self.pointer.split('.', 1):
+            point = increment_pointer(point, self.exercise_points)
+        if int(point.split('.')[0]) <= len(self.exercise_points):
+            self.groups[point].extend(values)
         # incrementing the pointer to the next not empty task
-        while not self.groups[self.pointer]:
+        while int(self.pointer.split('.')[0]) <= len(self.exercise_points) and not self.groups[self.pointer]:
             self.pointer = increment_pointer(self.pointer, self.exercise_points)
-        return values
 
     def get_task_distribution(self, ass_number: str):
         """Reads the task distribution of a given assignment number from the assignment config file"""
@@ -46,18 +52,24 @@ class PriorityGroups:
                         exercise_points.append(ast.literal_eval(exercise))
         return exercise_points
 
+    def get_exercise_points(self) -> list:
+        return self.exercise_points
+
+    def get_exercise_pointer(self) -> str:
+        return self.pointer
+
     def get_exercise_pointer_from_feedback(self, student_name: str, ass_number: str):
         pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
         feedback = []
         with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt',
                   'r') as f:
-            feedback.append(f.readlines())
+            feedback = f.readlines()
         while True:
             # already finished with correction of this student
             if get_index(feedback, pointer) == -1:
                 return -1
             # there is no correction for this pointer in the feedback
-            elif feedback[get_index(feedback, pointer) + 1] != '\n':
+            elif feedback[get_index(feedback, pointer) + 1] == '\n':
                 return pointer
             else:
                 pointer = increment_pointer(pointer, self.exercise_points)
