@@ -1,5 +1,5 @@
 Folder structure initializer:
-```
-find . -type d -maxdepth 1 -not -path './***REMOVED***' -not -path './.git' -exec bash -c "mkdir {}/feedback; mkdir {}/concatenated" \;
+```bash
+find . -type d -maxdepth 1 -not -path './***REMOVED***' -not -path './.git' -not -path '.' -exec bash -c "mkdir {}/feedback; mkdir {}/concatenated" \;
 ```
 
