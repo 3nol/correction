@@ -10,12 +10,13 @@ class PriorityGroups:
         for main_task in self.exercise_points:
             if len(main_task) == 1:
                 self.groups[f'{i}.'] = []
-                i += 1
             else:
                 j = 'a'
                 for _ in main_task:
                     self.groups[f'{i}.{j}'] = []
                     j = chr(ord(j) + 1)
+            i += 1
+
 
     def insert_at_pointer(self, student_name: str, exercise_pointer: str):
         if self.pointer > exercise_pointer or self.pointer == '':
@@ -30,7 +31,7 @@ class PriorityGroups:
         self.groups[self.pointer] = []
         # getting the pointer of the next main task
         point = self.pointer
-        while point.split('.', 1) == self.pointer.split('.', 1):
+        while point.split('.', 1)[0] == self.pointer.split('.', 1)[0]:
             point = increment_pointer(point, self.exercise_points)
         if int(point.split('.')[0]) <= len(self.exercise_points):
             self.groups[point].extend(values)
