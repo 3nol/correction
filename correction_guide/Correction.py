@@ -39,29 +39,25 @@ class Correction:
         otherwise the current progress is read from the save and restored"""
 
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
-        verify = str(input(f"Do you want to start with a new correction of {self.assignment_number}? [y/n] \n"))
-        if verify == 'y':
-            # extract all solution files to one file per student
-            corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
-            # create templates for feedbacks in every attendant's directory who needs a correction
-            start_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-            for student in self.tutti_names:
-                # if the student has a valid correction
-                if student in corrected_students:
-                    corrected_pointer = self.get_exercise_pointer_from_feedback(student)
-                    # if there is still something left so correct
-                    if corrected_pointer != -1:
-                        self.task_queue.insert_at_pointer(student, corrected_pointer)
-                # else create a new template
-                else:
-                    create_feedback(student, self.assignment_number, self.corrector, self.exercise_points)
-                    print('new feedback templates generated for' + student)
-                    self.task_queue.insert_at_pointer(student, start_pointer)
-            print('initialized progress save')
-        else:
-            print('no correct_tmp.txt was found!')
-            exit(1)
+        # extract all solution files to one file per student
+        corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
+        # create templates for feedbacks in every attendant's directory who needs a correction
+        start_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
+        for student in self.tutti_names:
+            # if the student has a valid correction
+            if student in corrected_students:
+                corrected_pointer = self.get_exercise_pointer_from_feedback(student)
+                # if there is still something left so correct
+                if corrected_pointer != -1:
+                    self.task_queue.insert_at_pointer(student, corrected_pointer)
+            # else create a new template
+            else:
+                create_feedback(student, self.assignment_number, self.corrector, self.exercise_points)
+                print('new feedback templates generated for' + student)
+                self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
+            if not self.offline:
+                self.sync_all_feedbacks()
             self.start_correction()
         else:
             print("There is no one left to correct!")
@@ -96,7 +92,13 @@ class Correction:
                         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
                             if len(self.exercise_points[int(task) - 1]) > 1 else \
                             self.exercise_points[int(task) - 1][0]
-                        if str(input('Is the solution correct? [y/n] \n')) == 'n':
+                        while True:
+                            correctness = str(input('Is the solution correct? [y/n] \n'))
+                            if correctness.lower() in ['n', 'y']:
+                                break
+                            else:
+                                print('Invalid input, try again.')
+                        if correctness.lower() == 'n':
                             while True:
                                 points = float(
                                     input('How many points should ' + just_name + ' get for this exercise?\n'
@@ -129,7 +131,6 @@ class Correction:
 
     def get_exercise_pointer_from_feedback(self, student_name: str):
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-        feedback = []
         with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt', 'r') as f:
             feedback = f.readlines()
         while True:
