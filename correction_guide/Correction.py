@@ -114,7 +114,7 @@ class Correction:
                         points = 0
                         comment = 'no solution'
                     # write task correction to feedback file and to database
-                    new_total_points = insert_in_file(path, self.task_queue.pointer, str(points), comment)
+                    new_total_points = insert_in_file(path, temp_pointer, str(points), comment)
                     if not self.offline:
                         insert_in_db(just_name, self.assignment_number, new_total_points)
                         update_db()
