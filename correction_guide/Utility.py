@@ -89,14 +89,14 @@ def get_index(current_file, exercise_pointer: str):
     return index
 
 
-def get_solution(file_path: str, exercise_pointer: str, exercise_points: list):
+def get_solution(current_file: list, exercise_pointer: str, exercise_points: list, printing=True):
     """Method to get the solution of an exercise of a person.
     Getting to the end of the exercise before and taking then
     everything to the end of the current task"""
 
-    print(exercise_pointer)
-    with open(file_path, 'r') as file:
-        current_file = file.readlines()
+    solution = []
+    if printing:
+        print(exercise_pointer)
     index = get_index(current_file, exercise_pointer)
     next_index = -1
     while int(exercise_pointer.split('.', 1)[0]) <= len(exercise_points) and next_index < 0:
@@ -105,8 +105,18 @@ def get_solution(file_path: str, exercise_pointer: str, exercise_points: list):
     if next_index == -1:
         next_index = len(current_file)
     while index < next_index:
-        print(current_file[index].strip())
+        if printing:
+            print(current_file[index].strip())
+        else:
+            solution.append(current_file[index].strip())
         index += 1
+    return solution
+
+
+def solution_exists(file: list, pointer):
+    """ Checking if the person made the exercise which means there is a exercise for the current pointer"""
+
+    return get_index(file, pointer) > 0
 
 
 def check_internet_connection() -> bool:

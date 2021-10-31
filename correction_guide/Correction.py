@@ -84,8 +84,10 @@ class Correction:
                     # a difference to the empty solution sheet
                     solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment' \
                                     f'{self.assignment_number}.txt'
-                    if self.solution_exists(solution_path):
-                        get_solution(solution_path, temp_pointer, self.exercise_points)
+                    with open(solution_path, 'r') as f:
+                        current_file = f.readlines()
+                    if solution_exists(current_file, temp_pointer):
+                        get_solution(current_file, temp_pointer, self.exercise_points)
                         comment = str(input('Please enter some comments (without newlines!)\n'))
                         (task, subtask) = temp_pointer.split('.', 1)
                         # get the maximum possible points for this exercise, either from the subtask or main task
@@ -122,12 +124,6 @@ class Correction:
                     temp_pointer = increment_pointer(temp_pointer, self.exercise_points)
             self.task_queue.move_up_smallest()
 
-    def solution_exists(self, filepath: str):
-        """ Checking if the person made the exercise which means there is a exercise for the current pointer"""
-
-        with open(filepath, 'r') as file:
-            current_file = file.readlines()
-        return get_index(current_file, self.task_queue.pointer) > 0
 
     def get_exercise_pointer_from_feedback(self, student_name: str):
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
