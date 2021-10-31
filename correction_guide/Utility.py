@@ -99,8 +99,8 @@ def get_index(current_file, exercise_pointer: str):
     match = '(' + '|'.join(taskString) + ')? *' + task
     for line in current_file:
         if re.match('^#? *' + match + ' *[:.)].*', line):
-            if subtask != match[1] and subtask != '':
-                match = '(' + subtask + '|' + str(subtask).upper() + ')'
+            if subtask != match[-2].lower() and subtask != '':
+                match = '(' + match + ')?(' + subtask + '|' + str(subtask).upper() + ')'
             else:
                 break
         index += 1

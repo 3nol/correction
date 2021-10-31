@@ -17,7 +17,6 @@ class PriorityGroups:
                     j = chr(ord(j) + 1)
             i += 1
 
-
     def insert_at_pointer(self, student_name: str, exercise_pointer: str):
         if self.pointer > exercise_pointer or self.pointer == '':
             self.pointer = exercise_pointer
