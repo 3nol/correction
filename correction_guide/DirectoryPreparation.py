@@ -36,6 +36,10 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
 
 
 def compare_old_correction_to_new_solution(student_name: str, ass_number: str, solution_content: list, old_solution: list):
+    """ this methods helps to correct a partial corrected assignment by cycling through all the tasks and subtasks
+    which already have a feedback. If there are changes in the students solution, the solution and the corresponding
+    feedback is printed.
+    """
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, 'r') as f:
             feedback = f.readlines()
@@ -44,6 +48,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
     # loop while there is still a feedback or no more exercises
     while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
+        # if there is a solution
         if solution_exists(solution_content, pointer):
             new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False)
@@ -77,7 +82,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
                     new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
                     insert_in_db(just_name, ass_number, new_total_points)
                     update_db()
-        # there is no solution
+        # if there is no solution i could have been deleted and therefore we just give 0 points
         else:
             points = 0
             comment = 'no solution'
@@ -86,7 +91,6 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
             insert_in_db(just_name, ass_number, new_total_points)
             update_db()
         pointer = increment_pointer(pointer, exercise_points)
-
 
 
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
