@@ -67,6 +67,24 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     return total
 
 
+def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
+    with open(file_path, 'r') as file:
+        current_file = file.readlines()
+    index = get_index(current_file, pointer)
+    next_index = get_index(current_file, increment_pointer(pointer, exercise_points))
+    points = float(current_file[index].split('/', 1)[0].split('[', 1)[1])
+    total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
+    current_file[index] = re.sub('\[[0-9](.5)?/', '[0/', current_file[index])
+    index += 1
+    # - 2 because there are always blank lines
+    while index < next_index - 2:
+        current_file[index] = ''
+        index += 1
+    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
+    with open(file_path, 'w') as file:
+        file.writelines(current_file)
+
+
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
