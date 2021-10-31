@@ -68,6 +68,8 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
 
 
 def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
+    """ to delete the feedback of a task or subtask from a feedback_file. Removing the previous given
+    points from the total points and setting the points from the task to 0 """
     with open(file_path, 'r') as file:
         current_file = file.readlines()
     index = get_index(current_file, pointer)
