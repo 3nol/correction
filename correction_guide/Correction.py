@@ -16,12 +16,11 @@ class Correction:
     - Correction-process: sequential go-through of exercises of all tuttis
     A progress save file is written to the filepath/correct_tmp.txt"""
 
-    def __init__(self, file_path: str, assignment_number: str, corrector: str):
+    def __init__(self, file_path: str, assignment_number: str):
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.file_path = file_path
         self.assignment_number = assignment_number
-        self.corrector = corrector
         self.offline = not check_internet_connection()
         # PriorityGroups objects to manage remaining students (to be corrected)
         self.task_queue = PriorityGroups(assignment_number)
@@ -52,7 +51,7 @@ class Correction:
                     self.task_queue.insert_at_pointer(student, corrected_pointer)
             # else create a new template
             else:
-                create_feedback(student, self.assignment_number, self.corrector, self.exercise_points)
+                create_feedback(student, self.assignment_number, self.exercise_points)
                 print('new feedback templates generated for' + student)
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
