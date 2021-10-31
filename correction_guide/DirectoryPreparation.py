@@ -1,7 +1,7 @@
 import os
 import re
 from glob import glob
-from Utility import trailing_os_sep
+from Utility import *
 
 
 def extract_solutions(ass_number: str, tutti_names: list) -> list:
@@ -25,11 +25,66 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
         # if there is no difference between the old solution and the new one
         if "".join(solution_content) == "".join(old_concatenated_solution):
             corrected_students.append(student_name)
-        else:
-            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                      f'{ass_number}.txt', 'w') as f:
-                f.writelines(solution_content)
+        elif os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
+            # TODO cycle through correction and check if the old correction can be used
+            compare_old_correction_to_new_solution(student_name, ass_number, solution_content, old_concatenated_solution)
+            corrected_students.append(student_name)
+        with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+                    f'{ass_number}.txt', 'w') as f:
+            f.writelines(solution_content)
     return corrected_students
+
+
+def compare_old_correction_to_new_solution(student_name: str, ass_number: str, solution_content: list, old_solution: list):
+    feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
+    with open(feedback_path, 'r') as f:
+            feedback = f.readlines()
+    exercise_points = get_configured_exercise_points(ass_number)
+    just_name = str(student_name).rsplit(os.path.sep, 1)[1]
+    pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
+    # loop while there is still a feedback or no more exercises
+    while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
+        if solution_exists(solution_content, pointer):
+            new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
+            old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False)
+            (task, subtask) = pointer.split('.', 1)
+            # get the maximum possible points for this exercise, either from the subtask or main task
+            possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+                if len(exercise_points[int(task) - 1]) > 1 else \
+                exercise_points[int(task) - 1][0]
+            # if there is a difference between the two exercises
+            if new_exercise != old_exercise:
+                for line in new_exercise:
+                    print(line)
+                print('-------- feedback for the old exercise ---------')
+                get_solution(feedback, pointer, exercise_points)
+                while True:
+                    correctness = str(input('Is the feedback still correct? [y/n] \n'))
+                    if correctness.lower() in ['n', 'y']:
+                        break
+                    else:
+                        print('Invalid input, try again.')
+                if correctness.lower() == 'n':
+                    comment = str(input('Please enter some comments (without newlines!)\n'))
+                    while True:
+                        points = float(
+                            input('How many points should get ' + just_name + ' for this exercise?\n'
+                                  + str(possible_points) + ' are possible!\n'))
+                        # check validity of inputted points
+                        if 0.0 <= points <= possible_points:
+                            break
+                    new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
+                    insert_in_db(just_name, ass_number, new_total_points)
+                    update_db()
+        # there is no solution
+        else:
+            points = 0
+            comment = 'no solution'
+            new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
+            insert_in_db(just_name, ass_number, new_total_points)
+            update_db()
+        pointer = increment_pointer(pointer, exercise_points)
+
 
 
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
