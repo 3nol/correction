@@ -42,7 +42,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
     """
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, 'r') as f:
-            feedback = f.readlines()
+        feedback = f.readlines()
     exercise_points = get_configured_exercise_points(ass_number)
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
@@ -96,8 +96,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
     tutti_solutions = {}
     for name in tutti_names:
-        potential_folders = [f for f in glob(f'{trailing_os_sep(name)}assignments{os.path.sep}'
-                                             f'*{str(int(ass_number))}*') if os.path.isdir(f)]
+        potential_folders = [f for f in glob(f'{trailing_os_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
+                                             recursive=True) if os.path.isdir(f)]
         solutions_files = []
         if len(potential_folders) > 0:
             if len(potential_folders) > 1:
