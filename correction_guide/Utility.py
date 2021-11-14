@@ -87,6 +87,14 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         file.writelines(current_file)
 
 
+def insert_total_in_db(tutti_names: list, ass_number: str):
+    for name in tutti_names:
+        with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt', 'r') as f:
+            total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
+        insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
+
+
+
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
