@@ -94,7 +94,6 @@ def insert_total_in_db(tutti_names: list, ass_number: str):
         insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
 
 
-
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
