@@ -3,7 +3,11 @@ from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
 
 
-def init_tutti_names(names: list):
+def init_tutti_names(names: list, filepath=False):
+    if filepath:
+        with open(names[0], 'r') as f:
+            names = list(filter(lambda x: x not in ['***REMOVED***', '***REMOVED***', '***REMOVED***'],
+                            map(lambda x: str(x).strip(), f.readlines())))
     for name in names:
         sql_query(f"INSERT INTO points_table (student_name) VALUES ('{name}')")
         print('inserted tutti:', name)
