@@ -3,7 +3,7 @@ import os
 import re
 import requests
 from DB import *
-from Paths import config_path
+from Paths import config_path, source_path
 
 
 taskString = ['Task', 'task', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesung', 'loesung', 'Solution', 'solution',
@@ -87,11 +87,12 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         file.writelines(current_file)
 
 
-def insert_total_in_db(tutti_names: list, ass_number: str):
+def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.scandir(source_path) if f.is_dir()]):
     for name in tutti_names:
         with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt', 'r') as f:
             total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
-        insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
+        print(str(name).rsplit(os.path.sep, 1)[1], total)
+        # insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
 
 
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
