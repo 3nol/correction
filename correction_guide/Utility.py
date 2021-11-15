@@ -91,8 +91,7 @@ def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.
     for name in tutti_names:
         with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt', 'r') as f:
             total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
-        print(str(name).rsplit(os.path.sep, 1)[1], total)
-        # insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
+        insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
 
 
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
