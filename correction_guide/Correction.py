@@ -91,33 +91,16 @@ class Correction:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer):
                         get_solution(current_file, temp_pointer, self.exercise_points)
-                        comment = str(input('Please enter some comments (without newlines!)\n'))
-                        (task, subtask) = temp_pointer.split('.', 1)
-                        # get the maximum possible points for this exercise, either from the subtask or main task
-                        possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
-                            if len(self.exercise_points[int(task) - 1]) > 1 else \
-                            self.exercise_points[int(task) - 1][0]
-                        while True:
-                            correctness = str(input('Is the solution correct? [y/n] \n'))
-                            if correctness.lower() in ['n', 'y']:
-                                break
-                            else:
-                                print('Invalid input, try again.')
-                        if correctness.lower() == 'n':
-                            while True:
-                                points = float(
-                                    input('How many points should ' + just_name + ' get for this exercise?\n'
-                                          + str(possible_points) + ' are possible!\n'))
-                                # check validity of inputted points
-                                if 0.0 <= points <= possible_points:
-                                    break
-                        else:
-                            # solution is correct -> give max. points
-                            points = possible_points
+                        (comment, points) = self.correction_handler(temp_pointer, just_name)
                     else:
-                        # solution does not exists -> 0 points
-                        points = 0
-                        comment = 'no solution'
+                        for line in current_file:
+                            print(line)
+                        if get_input('Is the task ' + temp_pointer + ' in the file?'):
+                            # start correction here
+                            (comment, points) = self.correction_handler(temp_pointer, just_name)
+                        else:
+                            points = 0
+                            comment = 'no solution'
                     # write task correction to feedback file and to database
                     new_total_points = insert_in_file(path, temp_pointer, str(points), comment)
                     if not self.offline:
@@ -126,7 +109,6 @@ class Correction:
                     # count to next task and save
                     temp_pointer = increment_pointer(temp_pointer, self.exercise_points)
             self.task_queue.move_up_smallest()
-
 
     def get_exercise_pointer_from_feedback(self, student_name: str):
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
@@ -151,3 +133,24 @@ class Correction:
             update_db()
         else:
             print('ERROR: you have to be online to sync all feedbacks!')
+
+    def correction_handler(self, temp_pointer: str, just_name: str) -> (str, str):
+        """method should return a tuple with the comment and the points for this exercise"""
+        comment = str(input('Please enter some comments (without newlines!)\n'))
+        (task, subtask) = temp_pointer.split('.', 1)
+        # get the maximum possible points for this exercise, either from the subtask or main task
+        possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+            if len(self.exercise_points[int(task) - 1]) > 1 else \
+            self.exercise_points[int(task) - 1][0]
+        if not get_input('Is the solution correct?'):
+            while True:
+                points = float(
+                    input('How many points should ' + just_name + ' get for this exercise?\n'
+                          + str(possible_points) + ' are possible!\n'))
+                # check validity of inputted points
+                if 0.0 <= points <= possible_points:
+                    break
+        else:
+            # solution is correct -> give max. points
+            points = possible_points
+        return comment, points

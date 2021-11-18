@@ -111,7 +111,7 @@ def get_index(current_file, exercise_pointer: str):
     (task, subtask) = exercise_pointer.split('.', 1)
     match = '(' + '|'.join(taskString) + ')? *' + task
     for line in current_file:
-        if re.match('^#? *' + match + ' *[:.)].*', line):
+        if re.match('^#?%* *' + match + ' *[:.)].*', line):
             if subtask != match[-2].lower() and subtask != '':
                 match = '(' + match + ')?(' + subtask + '|' + str(subtask).upper() + ')'
             else:
@@ -159,3 +159,14 @@ def check_internet_connection() -> bool:
     except (requests.ConnectionError, requests.Timeout):
         print('ERROR: not connected to the internet, correction starts in offline mode!')
         return False
+
+
+def get_input(message: str):
+    while True:
+        inp = str(input(message + ' [y/n] \n'))
+        if inp.lower() in ['n', 'y']:
+            if inp == 'y':
+                return True
+            return False
+        else:
+            print('Invalid input, try again.')
