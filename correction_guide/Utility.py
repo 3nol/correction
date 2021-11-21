@@ -64,6 +64,7 @@ def get_index(current_file, exercise_pointer: str):
             else:
                 break
         index += 1
+    # detecting task and subtask identifier on the same line
     if index == 0:
         for line in current_file:
             # if a task match occurs, the loop is exited
