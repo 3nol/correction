@@ -16,7 +16,7 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
         old_concatenated_solution = ''
         for file in solution_files[student_name]:
             if not ignore_file_for_solution(file):
-                with open(file, 'r') as f:
+                with open(file, 'r', errors='replace') as f:
                     solution_content.extend(f.readlines())
                 solution_content.append('\n')
         # saving the old file to check for changes
@@ -26,10 +26,10 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
                       f'{ass_number}.txt', 'r') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
-            if "".join(solution_content) == "".join(old_concatenated_solution):
-                corrected_students.append(student_name)
-            elif os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
-                compare_old_correction_to_new_solution(student_name, ass_number, solution_content, old_concatenated_solution)
+            if os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
+                if "".join(solution_content) != "".join(old_concatenated_solution):
+                    compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
+                                                           old_concatenated_solution)
                 corrected_students.append(student_name)
         with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                     f'{ass_number}.txt', 'w') as f:
