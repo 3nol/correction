@@ -13,17 +13,16 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
     corrected_students = []
     for student_name in solution_files:
         solution_content = []
-        old_concatenated_solution = ''
         for file in solution_files[student_name]:
             if not ignore_file_for_solution(file):
-                with open(file, 'r') as f:
+                with open(file, mode='r', errors='replace') as f:
                     solution_content.extend(f.readlines())
                 solution_content.append('\n')
         # saving the old file to check for changes
         if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                           f'{ass_number}.txt'):
             with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                      f'{ass_number}.txt', 'r') as f:
+                      f'{ass_number}.txt', mode='r', errors='replace') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
             if "".join(solution_content) == "".join(old_concatenated_solution):
@@ -32,7 +31,7 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
                 compare_old_correction_to_new_solution(student_name, ass_number, solution_content, old_concatenated_solution)
                 corrected_students.append(student_name)
         with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                    f'{ass_number}.txt', 'w') as f:
+                    f'{ass_number}.txt', mode='w') as f:
             f.writelines(solution_content)
     return corrected_students
 
@@ -43,7 +42,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
     feedback is printed"""
 
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
-    with open(feedback_path, 'r') as f:
+    with open(feedback_path, mode='r', errors='replace') as f:
         feedback = f.readlines()
     exercise_points = get_configured_exercise_points(ass_number)
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
@@ -136,7 +135,7 @@ def create_feedback(file_path: str, ass_number: str, exercise_points):
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points)
     feedback_path = f'{trailing_os_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
-    with open(feedback_path, 'w') as file:
+    with open(feedback_path, mode='w') as file:
         file.writelines(empty_feedback)
     print('generated file ' + feedback_path)
 
@@ -165,7 +164,8 @@ def generate_feedback_file(ass_number: str, exercise_points):
 
 def ignore_file_for_solution(file_path: str) -> bool:
     file_name = file_path.split(os.path.sep)[-1]
-    with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}correction_guide{os.path.sep}file_ignore.txt', 'r') as f:
+    with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}correction_guide{os.path.sep}file_ignore.txt',
+              mode='r', errors='replace') as f:
         reg_ignore = [x.strip() for x in f.readlines()]
     for ig in reg_ignore:
         if re.match(ig, file_name):

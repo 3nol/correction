@@ -18,7 +18,7 @@ def get_configured_exercise_points(ass_number: str):
     """Reads the points distribution of a given assignment number from the assignment config file"""
 
     exercise_points = []
-    with open(config_path + 'assignment_config.txt', 'r') as file:
+    with open(config_path + 'assignment_config.txt', mode='r', errors='replace') as file:
         for line in file.readlines():
             if line.strip().startswith(ass_number):
                 for exercise in line.strip().split(' : ', 1)[1].split(', '):
@@ -107,7 +107,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     """Method to edit/ fill in the correction into a pre-generated feedback file.
     This includes the points and a text for a given exercise."""
 
-    with open(file_path, 'r') as file:
+    with open(file_path, mode='r', errors='replace') as file:
         current_file = file.readlines()
     # preparing point amounts
     total = str(float(current_file[1][1:].split('/', 1)[0]) + float(points)).split('.0', 1)[0]
@@ -116,7 +116,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
-    with open(file_path, 'w') as file:
+    with open(file_path, mode='w') as file:
         file.writelines(current_file)
     return total
 
@@ -125,7 +125,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     """To delete the feedback of a task or subtask from a feedback_file. Removing the previous given
     points from the total points and setting the points from the task to 0 """
 
-    with open(file_path, 'r') as file:
+    with open(file_path, mode='r', errors='replace') as file:
         current_file = file.readlines()
     index = get_index(current_file, pointer)
     next_index = get_index(current_file, increment_pointer(pointer, exercise_points))
@@ -138,7 +138,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
-    with open(file_path, 'w') as file:
+    with open(file_path, mode='w') as file:
         file.writelines(current_file)
 
 
@@ -151,7 +151,8 @@ def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.
     if input('you sure? (y/n)\n') == 'y':
         print('inserting points for assignment', ass_number + ':')
         for name in tutti_names:
-            with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt', 'r') as f:
+            with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
+                      mode='r', errors='replace') as f:
                 total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
             insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
             print('-', str(name).rsplit(os.path.sep, 1)[1], total)
