@@ -11,7 +11,7 @@ taskString = ['Task', 'task', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesu
               r'Nr\.?', r'nr\.?']
 
 
-# -- POINTER & INDEX ARITHMETICS --
+# -- POINTER & INDEX ARITHMETIC --
 
 
 def get_configured_exercise_points(ass_number: str):
@@ -45,17 +45,31 @@ def increment_pointer(current_pointer: str, exercise_points: list):
 def get_index(current_file, exercise_pointer: str):
     """Magic method to get the start index of an exercise in the feedback or solution file"""
 
+    # defining match encasing, such as 1.)
+    encase_match = lambda m: r'^[#%/(]* *' + str(m) + ' *[:.)]{0,2}'
+
     index: int = 0
-    (task, subtask) = exercise_pointer.split('.', 1)
-    match = '(' + '|'.join(taskString) + ')? *' + task
+    task, subtask = exercise_pointer.split('.', 1)
+    # defining task and subtask identifier structure
+    task_match = rf'''({'|'.join(taskString)})? *0?{task}'''
+    subtask_match = rf'''({subtask}|{str(subtask).upper()})'''
+    identifier_match = task_match
+    # detecting separate task and subtask identifier
     for line in current_file:
-        # TODO match for task and subtask on the same line
-        if re.match(r'^[#%/(]* *0*' + match + ' *[:.)]', line):
-            if subtask != match[-2].lower() and subtask != '':
-                match = '(' + match + ')?(' + subtask + '|' + str(subtask).upper() + ')'
+        # if a task match occurs, match is changed to subtask match, if it matches again, the loop is exited
+        if re.match(encase_match(identifier_match), line):
+            # index -4 corresponds to the subtask value in subtask_match
+            if subtask != identifier_match[-4] and subtask != '':
+                identifier_match = rf'''({task_match})? *{subtask_match}'''
             else:
                 break
         index += 1
+    if index == 0:
+        for line in current_file:
+            # if a task match occurs, the loop is exited
+            if re.match(encase_match(rf'''{task_match} *{subtask_match}'''), line):
+                break
+            index += 1
     if index == len(current_file):
         index = -1
     return index
@@ -109,6 +123,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
 def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     """To delete the feedback of a task or subtask from a feedback_file. Removing the previous given
     points from the total points and setting the points from the task to 0 """
+
     with open(file_path, 'r') as file:
         current_file = file.readlines()
     index = get_index(current_file, pointer)
@@ -130,6 +145,8 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
 
 
 def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.scandir(source_path) if f.is_dir()]):
+    """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
+
     if input('you sure? (y/n)\n') == 'y':
         print('inserting points for assignment', ass_number + ':')
         for name in tutti_names:
@@ -143,6 +160,7 @@ def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.
 
 
 def insert_in_db(student_name: str, ass_number: str, total_points: str):
+    # inserts the points per assignment for a certain student into the database
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
 
@@ -164,6 +182,17 @@ def solution_exists(file: list, pointer):
     return get_index(file, pointer) > 0
 
 
+def get_input(message: str):
+    """Retrieves a yes/no -> True/False input from the console"""
+
+    while True:
+        inp = str(input(message + ' [y/n] \n'))
+        if inp.lower() in ['n', 'y']:
+            return inp == 'y'
+        else:
+            print('Invalid input, try again.')
+
+
 def check_internet_connection() -> bool:
     """Helper method to check for the database connection"""
 
@@ -173,14 +202,3 @@ def check_internet_connection() -> bool:
     except (requests.ConnectionError, requests.Timeout):
         print('ERROR: not connected to the internet, correction starts in offline mode!')
         return False
-
-
-def get_input(message: str):
-    while True:
-        inp = str(input(message + ' [y/n] \n'))
-        if inp.lower() in ['n', 'y']:
-            if inp == 'y':
-                return True
-            return False
-        else:
-            print('Invalid input, try again.')
