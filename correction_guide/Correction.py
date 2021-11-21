@@ -4,6 +4,9 @@ from DirectoryPreparation import extract_solutions, create_feedback
 
 
 def init_tutti_names(names: list, filepath=False):
+    """Takes in a list parameter, either a list with names for which each entry is pushed to the database.
+    If filepath=True and the list holds one entry, its content is used as a filepath to retrieves the names there"""
+
     if filepath:
         with open(names[0], 'r') as f:
             names = list(filter(lambda x: x not in ['***REMOVED***', '***REMOVED***', '***REMOVED***'],
@@ -34,6 +37,7 @@ class Correction:
         self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
 
     def get_just_names(self):
+        # splits the student's name from the file path and returns only it
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.tutti_names))
 
     def setup(self):
@@ -49,7 +53,7 @@ class Correction:
         for student in self.tutti_names:
             # if the student has a valid correction
             if student in corrected_students:
-                corrected_pointer = self.get_exercise_pointer_from_feedback(student)
+                corrected_pointer = self.__get_exercise_pointer_from_feedback(student)
                 # if there is still something left so correct
                 if corrected_pointer != -1:
                     self.task_queue.insert_at_pointer(student, corrected_pointer)
@@ -91,13 +95,13 @@ class Correction:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer):
                         get_solution(current_file, temp_pointer, self.exercise_points)
-                        (comment, points) = self.correction_handler(temp_pointer, just_name)
+                        comment, points = self.__correct_single_solution(temp_pointer, just_name)
                     else:
                         for line in current_file:
                             print(line)
                         if get_input('Is the task ' + temp_pointer + ' in the file?'):
                             # start correction here
-                            (comment, points) = self.correction_handler(temp_pointer, just_name)
+                            comment, points = self.__correct_single_solution(temp_pointer, just_name)
                         else:
                             points = 0
                             comment = 'no solution'
@@ -110,7 +114,10 @@ class Correction:
                     temp_pointer = increment_pointer(temp_pointer, self.exercise_points)
             self.task_queue.move_up_smallest()
 
-    def get_exercise_pointer_from_feedback(self, student_name: str):
+    def __get_exercise_pointer_from_feedback(self, student_name: str):
+        """Detects how far feedback has been giving by analyzing the feedback file and returning a corresponding
+        task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
+
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
         with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt', 'r') as f:
             feedback = f.readlines()
@@ -122,20 +129,14 @@ class Correction:
             # there is no correction for this feedback_pointer in the feedback
             elif feedback[index + 1] == '\n':
                 return feedback_pointer
+            # continue search
             feedback_pointer = increment_pointer(feedback_pointer, self.exercise_points)
 
-    def sync_all_feedbacks(self):
-        if not self.offline:
-            for name in self.tutti_names:
-                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt') as f:
-                    insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
-                                 str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
-            update_db()
-        else:
-            print('ERROR: you have to be online to sync all feedbacks!')
+    def __correct_single_solution(self, temp_pointer: str, just_name: str) -> (str, str):
+        """Correction of a single student. The student's concatenated content file is opened,
+        the right task is extracted and the tutor is asked for a comment, correctness and points.
+        Returns the comment and the received points"""
 
-    def correction_handler(self, temp_pointer: str, just_name: str) -> (str, str):
-        """method should return a tuple with the comment and the points for this exercise"""
         comment = str(input('Please enter some comments (without newlines!)\n'))
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
@@ -154,3 +155,15 @@ class Correction:
             # solution is correct -> give max. points
             points = possible_points
         return comment, points
+
+    def sync_all_feedbacks(self):
+        """Helper methods to synchronize all feedbacks with the database. Only works if the client has a connection"""
+
+        if not self.offline:
+            for name in self.tutti_names:
+                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt') as f:
+                    insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
+                                 str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
+            update_db()
+        else:
+            print('ERROR: you have to be online to sync all feedbacks!')
