@@ -49,28 +49,22 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
     # loop while there is still a feedback or no more exercises
     while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
+        (task, subtask) = pointer.split('.', 1)
+        # get the maximum possible points for this exercise, either from the subtask or main task
+        possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
+            if len(exercise_points[int(task) - 1]) > 1 else \
+            exercise_points[int(task) - 1][0]
         # if there is a solution
         if solution_exists(solution_content, pointer):
             new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False)
-            (task, subtask) = pointer.split('.', 1)
-            # get the maximum possible points for this exercise, either from the subtask or main task
-            possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
-                if len(exercise_points[int(task) - 1]) > 1 else \
-                exercise_points[int(task) - 1][0]
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
                 for line in new_exercise:
                     print(line)
                 print('-------- feedback for the old exercise ---------')
                 get_solution(feedback, pointer, exercise_points)
-                while True:
-                    correctness = str(input('Is the feedback still correct? [y/n] \n'))
-                    if correctness.lower() in ['n', 'y']:
-                        break
-                    else:
-                        print('Invalid input, try again.')
-                if correctness.lower() == 'n':
+                if not get_input('Is the feedback still correct?'):
                     comment = str(input('Please enter some comments (without newlines!)\n'))
                     while True:
                         points = float(
@@ -85,8 +79,21 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
                     update_db()
         # if there is no solution i could have been deleted and therefore we just give 0 points
         else:
-            points = 0
-            comment = 'no solution'
+            for line in solution_content:
+                print(line)
+            if get_input('Is the task ' + pointer + ' in the file?'):
+                # start correction here
+                comment = str(input('Please enter some comments (without newlines!)\n'))
+                while True:
+                    points = float(
+                        input('How many points should get ' + just_name + ' for this exercise?\n'
+                              + str(possible_points) + ' are possible!\n'))
+                    # check validity of inputted points
+                    if 0.0 <= points <= possible_points:
+                        break
+            else:
+                points = 0
+                comment = 'no solution'
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
             insert_in_db(just_name, ass_number, new_total_points)
