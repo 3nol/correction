@@ -49,7 +49,8 @@ def get_index(current_file, exercise_pointer: str):
     (task, subtask) = exercise_pointer.split('.', 1)
     match = '(' + '|'.join(taskString) + ')? *' + task
     for line in current_file:
-        if re.match('^#? *' + match + ' *[:.)].*', line):
+        # TODO match for task and subtask on the same line
+        if re.match(r'^[#%/(]* *0*' + match + ' *[:.)]', line):
             if subtask != match[-2].lower() and subtask != '':
                 match = '(' + match + ')?(' + subtask + '|' + str(subtask).upper() + ')'
             else:
@@ -114,7 +115,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     next_index = get_index(current_file, increment_pointer(pointer, exercise_points))
     points = float(current_file[index].split('/', 1)[0].split('[', 1)[1])
     total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
-    current_file[index] = re.sub('\[[0-9](.5)?/', '[0/', current_file[index])
+    current_file[index] = re.sub(r'\[[0-9](.5)?/', '[0/', current_file[index])
     index += 1
     # - 2 because there are always blank lines
     while index < next_index - 2:
