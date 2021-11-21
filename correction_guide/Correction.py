@@ -8,7 +8,7 @@ def init_tutti_names(names: list, filepath=False):
     If filepath=True and the list holds one entry, its content is used as a filepath to retrieves the names there"""
 
     if filepath:
-        with open(names[0], 'r') as f:
+        with open(names[0], mode='r', errors='replace') as f:
             names = list(filter(lambda x: x not in ['johannes.fuchs', 'clara.biedermann', 'leon.wenzler'],
                             map(lambda x: str(x).strip(), f.readlines())))
     for name in names:
@@ -91,7 +91,7 @@ class Correction:
                     # a difference to the empty solution sheet
                     solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment' \
                                     f'{self.assignment_number}.txt'
-                    with open(solution_path, 'r') as f:
+                    with open(solution_path, mode='r', errors='replace') as f:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer):
                         get_solution(current_file, temp_pointer, self.exercise_points)
@@ -119,7 +119,8 @@ class Correction:
         task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
 
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-        with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt', 'r') as f:
+        with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+                  mode='r', errors='replace') as f:
             feedback = f.readlines()
         while True:
             index = get_index(feedback, feedback_pointer)
@@ -161,7 +162,8 @@ class Correction:
 
         if not self.offline:
             for name in self.tutti_names:
-                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt') as f:
+                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+                          mode='r', errors='replace') as f:
                     insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                  str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
             update_db()
