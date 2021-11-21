@@ -15,9 +15,10 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
         solution_content = []
         old_concatenated_solution = ''
         for file in solution_files[student_name]:
-            with open(file, 'r') as f:
-                solution_content.extend(f.readlines())
-            solution_content.append('\n')
+            if not ignore_file_for_solution(file):
+                with open(file, 'r') as f:
+                    solution_content.extend(f.readlines())
+                solution_content.append('\n')
         # saving the old file to check for changes
         if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                           f'{ass_number}.txt'):
@@ -160,3 +161,13 @@ def generate_feedback_file(ass_number: str, exercise_points):
         lines.append('\n')
         task_counter += 1
     return lines
+
+
+def ignore_file_for_solution(file_path: str) -> bool:
+    file_name = file_path.split(os.path.sep)[-1]
+    with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}correction_guide{os.path.sep}file_ignore.txt', 'r') as f:
+        reg_ignore = [x.strip() for x in f.readlines()]
+    for ig in reg_ignore:
+        if re.match(ig, file_name):
+            return True
+    return False
