@@ -8,6 +8,7 @@ from Paths import corrector
 def extract_solutions(ass_number: str, tutti_names: list) -> list:
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
+
     solution_files = find_solution_files(ass_number, tutti_names)
     corrected_students = []
     for student_name in solution_files:
@@ -36,10 +37,10 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
 
 
 def compare_old_correction_to_new_solution(student_name: str, ass_number: str, solution_content: list, old_solution: list):
-    """ this methods helps to correct a partial corrected assignment by cycling through all the tasks and subtasks
+    """Helps to correct a partial corrected assignment by cycling through all the tasks and subtasks
     which already have a feedback. If there are changes in the students solution, the solution and the corresponding
-    feedback is printed.
-    """
+    feedback is printed"""
+
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, 'r') as f:
         feedback = f.readlines()
@@ -94,6 +95,9 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
 
 
 def find_solution_files(ass_number: str, tutti_names: list) -> dict:
+    """Super smart method for detecting solutions in almost any folder structure. If multiple options are possible,
+    the tutor is asked to decide which one to pick"""
+
     tutti_solutions = {}
     for name in tutti_names:
         potential_folders = [f for f in glob(f'{trailing_os_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
@@ -107,7 +111,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                 i = -1
                 while not 0 <= i < len(potential_folders):
                     index = input('Input the index for the correct folder: ')
-                    if re.match('\d+', index):
+                    if re.match(r'\d+', index):
                         i = int(index)
             else:
                 i = 0
@@ -149,40 +153,3 @@ def generate_feedback_file(ass_number: str, exercise_points):
         lines.append('\n')
         task_counter += 1
     return lines
-
-# def generate_all_solution_templates(ass_number: str):
-#     """Generates an empty solution for every student"""
-#
-#     ending = '.txt'
-#     tutti_names = [f.path for f in os.scandir(source_path) if f.is_dir()]
-#     for name in tutti_names:
-#         if 'fuchs' not in name:
-#             just_name = str(name).split(os.path.sep)
-#             empty_solution_file = create_empty_solution(just_name[len(just_name) - 1], ass_number)
-#             solution_path = f'{tailing_os_sep(name, True)}assignment{ass_number}{ending}'
-#             with open(solution_path, 'w') as file:
-#                 file.writelines(empty_solution_file)
-#             print('generated file' + solution_path)
-#
-#
-# def create_empty_solution(student: str, number: str):
-#     """ creating a list of lines containing an empty template for the solution of a given
-#     assigment number by using the assignment_config.txt"""
-#
-#     exercise_points = get_exercise_points(number)
-#     lines = ['# Assignment ' + number + '\n', '# ' + student + '\n', '\n']
-#     task_counter = 1
-#     for exercise in exercise_points:
-#         lines.append('\n')
-#         if len(exercise) > 1:
-#             lines.append('Task ' + str(task_counter) + ':\n')
-#             subtask_counter = 'a'
-#             for _ in exercise:
-#                 lines.append('' + subtask_counter + ')\n')
-#                 lines.append('\n')
-#                 subtask_counter = chr(ord(subtask_counter) + 1)
-#         else:
-#             lines.append('Task ' + str(task_counter) + ':\n')
-#         lines.append('\n')
-#         task_counter += 1
-#     return lines
