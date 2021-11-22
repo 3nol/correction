@@ -1,0 +1,7 @@
+.*.docx
+.*.odt
+.*.pdf
+.*.zip
+bibel.txt
+.*SPAMTRUE.*
+.*SPAMFALSE.*

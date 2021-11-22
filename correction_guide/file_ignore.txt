@@ -1,5 +1,0 @@
-.*.docx
-.*.odt
-.*.pdf
-.*.zip
-bibel.txt
