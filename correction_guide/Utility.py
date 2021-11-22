@@ -47,7 +47,7 @@ def get_index(current_file, exercise_pointer: str):
     """Magic method to get the start index of an exercise in the feedback or solution file"""
 
     # defining match encasing, such as 1.)
-    encase_match = lambda m: r'^[#%/(]* *' + str(m) + ' *[:.) \n]{1,3}'
+    encase_match = lambda m: r'^[#%/(\t]* *' + str(m) + ' *[:.) \n]{1,3}'
 
     index: int = 0
     task, subtask = exercise_pointer.split('.', 1)
