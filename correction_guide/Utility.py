@@ -155,7 +155,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
 def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.scandir(source_path) if f.is_dir()]):
     """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
 
-    if input('you sure? (y/n)\n') == 'y':
+    if get_input('Are you sure? [y/n]', 'text'):
         print('inserting points for assignment', ass_number + ':')
         for name in tutti_names:
             with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
