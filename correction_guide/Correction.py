@@ -27,17 +27,24 @@ class Correction:
     def __init__(self, file_path: str, assignment_number: str):
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
-        self.file_path = file_path
-        self.assignment_number = assignment_number
-        self.offline = not check_internet_connection()
+        self.file_path: str = file_path
+        self.assignment_number: str = assignment_number
+        self.offline: bool = not check_internet_connection()
         # PriorityGroups objects to manage remaining students (to be corrected)
-        self.task_queue = PriorityGroups(assignment_number)
+        self.task_queue: PriorityGroups = PriorityGroups(assignment_number)
         # getting points distribution from config file 'assignment_config.txt'
-        self.exercise_points = get_configured_exercise_points(self.assignment_number)
+        self.exercise_points: list = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
-        self.tutti_names = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
+        self.tutti_names: list = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
+        # tracking the status of the corrected tasks
+        self.corrected_task_amount: int = 0
 
-    def get_just_names(self):
+    def get_status(self) -> str:
+        # calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage
+        fraction_corrected = self.corrected_task_amount / (count_sublists(self.exercise_points) * len(self.tutti_names))
+        return f'{str(fraction_corrected)[2:4]}.{str(fraction_corrected)[4:6]}%'
+
+    def get_just_names(self) -> list:
         # splits the student's name from the file path and returns only it
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.tutti_names))
 
@@ -58,6 +65,12 @@ class Correction:
                 # if there is still something left so correct
                 if corrected_pointer != -1:
                     self.task_queue.insert_at_pointer(student, corrected_pointer)
+                    c_task, c_subtask = corrected_pointer.split('.', 1)
+                    self.corrected_task_amount += count_sublists(self.exercise_points[:(int(c_task) - 1)])
+                    if c_subtask != '':
+                        self.corrected_task_amount += ord(c_subtask) - 97
+                else:
+                    self.corrected_task_amount += count_sublists(self.exercise_points)
             # else create a new template
             else:
                 create_feedback(student, self.assignment_number, self.exercise_points)
@@ -81,7 +94,7 @@ class Correction:
             for name in self.task_queue.peek_smallest():
                 # check if it actually worked and the correct student is selected
                 just_name = str(name).rsplit(os.path.sep, 1)[1]
-                print('\n-------- ' + just_name + ' --------\n')
+                print('\n-------- ' + just_name + ' @ ' + str(self.get_status()) + ' --------\n')
                 t = self.task_queue.pointer.split('.', 1)[0]
                 # saving the pointer for the next person
                 temp_pointer = self.task_queue.pointer
@@ -111,6 +124,8 @@ class Correction:
                     if not self.offline:
                         insert_in_db(just_name, self.assignment_number, new_total_points)
                         update_db()
+                    # increase corrected tasks
+                    self.corrected_task_amount += 1
                     # count to next task and save
                     temp_pointer = increment_pointer(temp_pointer, self.exercise_points)
             self.task_queue.move_up_smallest()
