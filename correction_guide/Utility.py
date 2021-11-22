@@ -6,10 +6,12 @@ from DB import *
 from Paths import config_path, source_path
 
 
-taskString = ['Task', 'task', 'TASK', 'Subtask', 'SubTask', 'subtask', 'SUBTASK', 'Aufgabe', 'aufgabe', 'AUFGABE',
-              'Lösung', 'lösung', 'LÖSUNG', 'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION',
-              'Sol', 'sol', 'SOL', 'Exercise', 'exercise', 'EXERCISE', r'Ex\.?', r'ex\.?', r'EX\.?', r'No\.?', r'no\.?',
-              r'NO\.?', 'Number', 'number', 'NUMBER', 'Nummer', 'nummer', 'NUMMER', r'Nr\.?', r'nr\.?', r'NR\.?']
+taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'AUFGABE', 'Lösung', 'lösung', 'LÖSUNG',
+              'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION', 'Sol', 'sol', 'SOL',
+              'Exercise', 'exercise', 'EXERCISE', r'Ex\.?', r'ex\.?', r'EX\.?', 'Number', 'number', 'NUMBER',
+              r'No\.?', r'no\.?', r'NO\.?', 'Nummer', 'nummer', 'NUMMER', r'Nr\.?', r'nr\.?', r'NR\.?']
+subtaskString = ['SubTask', 'subtask', 'SUBTASK', 'Aufgabe', 'aufgabe', 'AUFGABE', r'Ex\.?', r'ex\.?', r'EX\.?',
+                 r'No\.?', r'no\.?', r'NO\.?', r'Nr\.?', r'nr\.?', r'NR\.?']
 
 
 # -- POINTER & INDEX ARITHMETIC --
@@ -53,7 +55,7 @@ def get_index(current_file, exercise_pointer: str):
     task, subtask = exercise_pointer.split('.', 1)
     # defining task and subtask identifier structure
     task_match = rf'''({'|'.join(taskString)})? *0?{task}'''
-    subtask_match = rf'''({subtask}|{str(subtask).upper()})'''
+    subtask_match = rf'''({'|'.join(subtaskString)})? *({subtask}|{str(subtask).upper()})'''
     identifier_match = task_match
     # detecting separate task and subtask identifier
     for line in current_file:
