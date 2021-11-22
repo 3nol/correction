@@ -1,4 +1,3 @@
-import textwrap
 from Utility import *
 from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
@@ -113,7 +112,7 @@ class Correction:
                     else:
                         for line in current_file:
                             print(line.strip())
-                        if get_input('Is the task ' + temp_pointer + ' in the file?'):
+                        if get_input('Is the task ' + temp_pointer + ' in the file? [y/n]'):
                             # start correction here
                             comment, points = self.__correct_single_solution(temp_pointer, just_name)
                         else:
@@ -154,17 +153,16 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
-        comment = textwrap.fill(str(input('Please enter some comments (without newlines!)\n')), 80)
+        comment = get_input('Please enter some comments (without newlines!)', 'text')
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
             if len(self.exercise_points[int(task) - 1]) > 1 else \
             self.exercise_points[int(task) - 1][0]
-        if not get_input('Is the solution correct?'):
+        if not get_input('Is the solution correct? [y/n]'):
             while True:
-                points = float(
-                    input('How many points should ' + just_name + ' get for this exercise?\n'
-                          + str(possible_points) + ' are possible!\n'))
+                points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
+                                   + str(possible_points) + ' are possible!', 'numeric')
                 # check validity of inputted points
                 if 0.0 <= points <= possible_points:
                     break
