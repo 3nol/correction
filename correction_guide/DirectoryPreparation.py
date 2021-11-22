@@ -40,11 +40,12 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
     which already have a feedback. If there are changes in the students solution, the solution and the corresponding
     feedback is printed"""
 
+    just_name = str(student_name).rsplit(os.path.sep, 1)[1]
+    print('\n-------- ' + just_name + ' --------\n')
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, mode='r', errors='replace') as f:
         feedback = f.readlines()
     exercise_points = get_configured_exercise_points(ass_number)
-    just_name = str(student_name).rsplit(os.path.sep, 1)[1]
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
     # loop while there is still a feedback or no more exercises
     while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
@@ -56,7 +57,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
         # if there is a solution
         if solution_exists(solution_content, pointer):
             new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
-            old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False)
+            old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False) \
+                if solution_exists(old_solution, pointer) else []
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
                 for line in new_exercise:
