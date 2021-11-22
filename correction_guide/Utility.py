@@ -64,7 +64,8 @@ def get_index(current_file, exercise_pointer: str):
             # index -4 corresponds to the subtask value in subtask_match
             if subtask != identifier_match[-4] and subtask != '':
                 identifier_match = rf'''({task_match})? *{subtask_match}'''
-                continue
+                if re.match(encase_match(identifier_match), line):
+                    break
             else:
                 break
         index += 1
@@ -138,8 +139,8 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
     current_file[index] = re.sub(r'\[[0-9](.5)?/', '[0/', current_file[index])
     index += 1
-    # - 2 because there are always blank lines
-    while index < next_index - 2:
+    # - 1 because there is always 1 blank line
+    while index < next_index - 1:
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
@@ -182,6 +183,10 @@ def trailing_os_sep(path: str, should_have_sep: bool = True):
     elif path[-1] == os.sep and not should_have_sep:
         return path[0:-1]
     return path
+
+
+def count_sublists(some_list: list):
+    return sum(map(lambda x: len(x), some_list))
 
 
 def solution_exists(file: list, pointer):
