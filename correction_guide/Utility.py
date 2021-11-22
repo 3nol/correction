@@ -6,7 +6,7 @@ from DB import *
 from Paths import config_path, source_path
 
 
-taskString = ['Task', 'task', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesung', 'loesung', 'Solution', 'solution',
+taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'Lösung', 'lösung', 'Loesung', 'loesung', 'Solution', 'solution',
               'Exercise', 'exercise', r'Ex\.?', r'ex\.?', 'Number', 'number', r'No\.?', r'no\.?', 'Nummer', 'nummer',
               r'Nr\.?', r'nr\.?']
 
