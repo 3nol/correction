@@ -2,6 +2,7 @@ import ast
 import os
 import re
 import requests
+import textwrap
 from DB import *
 from Paths import config_path, source_path
 
@@ -194,13 +195,17 @@ def solution_exists(file: list, pointer):
     return get_index(file, pointer) > 0
 
 
-def get_input(message: str):
-    """Retrieves a yes/no -> True/False input from the console"""
+def get_input(message: str, input_type: str = 'boolean'):
+    """Retrieves an input from the console in a failsafe way"""
 
     while True:
-        inp = str(input(message + ' [y/n] \n'))
-        if inp.lower() in ['n', 'y']:
+        inp = str(input(message + '\n'))
+        if input_type == 'boolean' and inp.lower() in ['n', 'y']:
             return inp == 'y'
+        elif input_type == 'numeric' and re.match(r'\d+(\.5)?', inp):
+            return float(inp)
+        elif input_type == 'text':
+            return textwrap.fill(str(inp), 80) if inp != '' else ' '
         else:
             print('Invalid input, try again.')
 

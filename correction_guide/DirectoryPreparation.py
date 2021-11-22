@@ -65,12 +65,11 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
                     print(line)
                 print('-------- feedback for the old exercise ---------')
                 get_solution(feedback, pointer, exercise_points)
-                if not get_input('Is the feedback still correct?'):
-                    comment = str(input('Please enter some comments (without newlines!)\n'))
+                if not get_input('Is the feedback still correct? [y/n]'):
+                    comment = get_input('Please enter some comments (without newlines!)', 'text')
                     while True:
-                        points = float(
-                            input('How many points should get ' + just_name + ' for this exercise?\n'
-                                  + str(possible_points) + ' are possible!\n'))
+                        points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
+                                           + str(possible_points) + ' are possible!', 'numeric')
                         # check validity of inputted points
                         if 0.0 <= points <= possible_points:
                             break
@@ -82,13 +81,12 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
         else:
             for line in solution_content:
                 print(line)
-            if get_input('Is the task ' + pointer + ' in the file?'):
+            if get_input('Is the task ' + pointer + ' in the file? [y/n]'):
                 # start correction here
-                comment = str(input('Please enter some comments (without newlines!)\n'))
+                comment = get_input('Please enter some comments (without newlines!)', 'text')
                 while True:
-                    points = float(
-                        input('How many points should get ' + just_name + ' for this exercise?\n'
-                              + str(possible_points) + ' are possible!\n'))
+                    points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
+                                       + str(possible_points) + ' are possible!', 'numeric')
                     # check validity of inputted points
                     if 0.0 <= points <= possible_points:
                         break
