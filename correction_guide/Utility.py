@@ -116,7 +116,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
-    with open(file_path, mode='w') as file:
+    with open(file_path, mode='w', errors='replace') as file:
         file.writelines(current_file)
     return total
 
@@ -138,7 +138,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
-    with open(file_path, mode='w') as file:
+    with open(file_path, mode='w', errors='replace') as file:
         file.writelines(current_file)
 
 
