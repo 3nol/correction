@@ -1,3 +1,4 @@
+import textwrap
 from Utility import *
 from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
@@ -138,7 +139,7 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
-        comment = str(input('Please enter some comments (without newlines!)\n'))
+        comment = textwrap.fill(str(input('Please enter some comments (without newlines!)\n')), 80)
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
