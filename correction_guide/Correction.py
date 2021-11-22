@@ -48,7 +48,6 @@ class Correction:
         print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
         # extract all solution files to one file per student
         corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
-        print(corrected_students)
         # create templates for feedbacks in every attendant's directory who needs a correction
         start_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
         for student in self.tutti_names:
