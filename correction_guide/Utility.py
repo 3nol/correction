@@ -64,17 +64,19 @@ def get_index(current_file, exercise_pointer: str):
             # index -4 corresponds to the subtask value in subtask_match
             if subtask != identifier_match[-4] and subtask != '':
                 identifier_match = rf'''({task_match})? *{subtask_match}'''
+                continue
             else:
                 break
         index += 1
     # detecting task and subtask identifier on the same line
-    if index == 0:
+    if index >= len(current_file) - 1:
+        index = 0
         for line in current_file:
             # if a task match occurs, the loop is exited
             if re.match(encase_match(rf'''{task_match} *{subtask_match}'''), line):
                 break
             index += 1
-    if index == len(current_file):
+    if index >= len(current_file) - 1:
         index = -1
     return index
 
