@@ -6,10 +6,10 @@ from DB import *
 from Paths import config_path, source_path
 
 
-taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'AUFGABE', 'Lösung', 'lösung', 'LÖSUNG',
-              'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION', 'Sol', 'sol', 'SOL',
-              'Exercise', 'exercise', 'EXERCISE', r'Ex\.?', r'ex\.?', r'EX\.?', 'Number', 'number', 'NUMBER',
-              r'No\.?', r'no\.?', r'NO\.?', 'Nummer', 'nummer', 'NUMMER', r'Nr\.?', r'nr\.?', r'NR\.?']
+taskString = ['Task', 'task', 'TASK', 'Subtask', 'SubTask', 'subtask', 'SUBTASK', 'Aufgabe', 'aufgabe', 'AUFGABE',
+              'Lösung', 'lösung', 'LÖSUNG', 'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION',
+              'Sol', 'sol', 'SOL', 'Exercise', 'exercise', 'EXERCISE', r'Ex\.?', r'ex\.?', r'EX\.?', r'No\.?', r'no\.?',
+              r'NO\.?', 'Number', 'number', 'NUMBER', 'Nummer', 'nummer', 'NUMMER', r'Nr\.?', r'nr\.?', r'NR\.?']
 
 
 # -- POINTER & INDEX ARITHMETIC --
