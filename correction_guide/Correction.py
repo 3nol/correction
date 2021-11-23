@@ -41,7 +41,7 @@ class Correction:
     def get_status(self) -> str:
         # calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage
         fraction_corrected = self.corrected_task_amount / (count_sublists(self.exercise_points) * len(self.tutti_names))
-        return f'{str(fraction_corrected)[2:4]}.{str(fraction_corrected)[4:6]}%'
+        return f'''{str(fraction_corrected)[2:4].ljust(2, '0')}.{str(fraction_corrected)[4:6].ljust(2, '0')}%'''
 
     def get_just_names(self) -> list:
         # splits the student's name from the file path and returns only it
