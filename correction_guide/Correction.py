@@ -112,8 +112,12 @@ class Correction:
                         get_solution(current_file, temp_pointer, self.exercise_points)
                         comment, points = self.__correct_single_solution(temp_pointer, just_name)
                     else:
-                        for line in current_file:
-                            print(line.strip())
+                        if ''.join(current_file).strip() == '':
+                            print(f'No solution file was found for assignment {self.assignment_number}.\n'
+                                  f'Please check the repository of {just_name} for the existence of task {temp_pointer}.')
+                        else:
+                            for line in current_file:
+                                print(line.strip())
                         if get_input('Is the task ' + temp_pointer + ' in the file? [y/n]'):
                             # start correction here
                             comment, points = self.__correct_single_solution(temp_pointer, just_name)
