@@ -162,6 +162,8 @@ def generate_feedback_file(ass_number: str, exercise_points):
 
 
 def is_ignored_file(file_path: str) -> bool:
+    """Checks whether the file is on the list of ignored files (file_ignore.txt)"""
+
     file_name = file_path.split(os.path.sep)[-1]
     with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}file_ignore.txt',
               mode='r', errors='replace') as f:

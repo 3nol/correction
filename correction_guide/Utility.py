@@ -1,11 +1,10 @@
 import ast
 import os
 import re
-import requests
 import textwrap
+import requests
 from DB import *
 from Paths import config_path, source_path
-
 
 taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'AUFGABE', 'Lösung', 'lösung', 'LÖSUNG',
               'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION', 'Sol', 'sol', 'SOL',
@@ -62,7 +61,7 @@ def decrement_pointer(current_pointer: str, exercise_points: list):
 
 
 def get_index(current_file, exercise_pointer: str, start_index: int = 0):
-    """Magic method to get the start index of an exercise in the feedback or solution file"""
+    """Super magic method to get the start index of an exercise in the feedback or solution file"""
 
     # defining match encasing, such as 1.)
     encase_match = lambda m: r'^[#%/(\t+-]* *' + str(m) + ' *[:.) \n+-]{1,3}'
@@ -171,7 +170,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
 def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.scandir(source_path) if f.is_dir()]):
     """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
 
-    if get_input('Are you sure? [y/n]', 'text'):
+    if get_input('Are you sure? [y/n]'):
         print('inserting points for assignment', ass_number + ':')
         for name in tutti_names:
             with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
@@ -226,7 +225,7 @@ def get_input(message: str, input_type: str = 'boolean'):
             print('Invalid input, try again.')
 
 
-def check_internet_connection() -> bool:
+def is_db_available() -> bool:
     """Helper method to check for the database connection"""
 
     try:
