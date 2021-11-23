@@ -119,7 +119,7 @@ class Correction:
                             comment, points = self.__correct_single_solution(temp_pointer, just_name)
                         else:
                             points = 0
-                            comment = 'no solution'
+                            comment = 'No solution.'
                     # write task correction to feedback file and to database
                     new_total_points = insert_in_file(path, temp_pointer, str(points), comment)
                     if is_db_available():
@@ -183,6 +183,7 @@ class Correction:
                 points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}]')
                 if points.findall(file[i]):
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
+            total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
             with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment03.txt',
                       mode='w', errors='replace') as f:
