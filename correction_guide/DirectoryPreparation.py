@@ -92,7 +92,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
                         break
             else:
                 points = 0
-                comment = 'no solution'
+                comment = 'No solution.'
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
             insert_in_db(just_name, ass_number, new_total_points)
