@@ -79,8 +79,7 @@ class Correction:
             print('--- CORRECTION DONE ---')
             self.__recalculate_points()
             print('--- POINT RECALCULATION DONE ---')
-            if is_db_available():
-                self.sync_all_feedbacks()
+            if self.sync_all_feedbacks():
                 print('--- DATABASE UPDATE DONE ---')
         else:
             print("There is no one left to correct!")
@@ -190,7 +189,7 @@ class Correction:
                 f.writelines(file)
             print('INFO: wrote feedback successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
 
-    def sync_all_feedbacks(self):
+    def sync_all_feedbacks(self) -> bool:
         """Helper methods to synchronize all feedbacks with the database. Only works if the client has a connection"""
 
         if is_db_available():
@@ -200,5 +199,7 @@ class Correction:
                     insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                  str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
             update_db()
+            return True
         else:
             print('ERROR: you have to be online to sync all feedbacks!')
+            return False
