@@ -1,5 +1,3 @@
-import re
-
 from Utility import *
 from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
@@ -30,7 +28,6 @@ class Correction:
 
         self.file_path: str = file_path
         self.assignment_number: str = assignment_number
-        self.offline: bool = not check_internet_connection()
         # PriorityGroups objects to manage remaining students (to be corrected)
         self.task_queue: PriorityGroups = PriorityGroups(assignment_number)
         # getting points distribution from config file 'assignment_config.txt'
@@ -82,7 +79,7 @@ class Correction:
             print('--- CORRECTION DONE ---')
             self.__recalculate_points()
             print('--- POINT RECALCULATION DONE ---')
-            if not self.offline:
+            if is_db_available():
                 self.sync_all_feedbacks()
                 print('--- DATABASE UPDATE DONE ---')
         else:
@@ -126,7 +123,7 @@ class Correction:
                             comment = 'no solution'
                     # write task correction to feedback file and to database
                     new_total_points = insert_in_file(path, temp_pointer, str(points), comment)
-                    if not self.offline:
+                    if is_db_available():
                         insert_in_db(just_name, self.assignment_number, new_total_points)
                         update_db()
                     # increase corrected tasks
@@ -196,7 +193,7 @@ class Correction:
     def sync_all_feedbacks(self):
         """Helper methods to synchronize all feedbacks with the database. Only works if the client has a connection"""
 
-        if not self.offline:
+        if is_db_available():
             for name in self.tutti_names:
                 with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
                           mode='r', errors='replace') as f:
