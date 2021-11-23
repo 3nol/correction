@@ -106,7 +106,7 @@ class Correction:
                                     f'{self.assignment_number}.txt'
                     with open(solution_path, mode='r', errors='replace') as f:
                         current_file = f.readlines()
-                    if solution_exists(current_file, temp_pointer):
+                    if solution_exists(current_file, temp_pointer, self.exercise_points):
                         get_solution(current_file, temp_pointer, self.exercise_points)
                         comment, points = self.__correct_single_solution(temp_pointer, just_name)
                     else:

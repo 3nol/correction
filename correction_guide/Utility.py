@@ -46,13 +46,28 @@ def increment_pointer(current_pointer: str, exercise_points: list):
     return f'{task}.{subtask}'
 
 
-def get_index(current_file, exercise_pointer: str):
+def decrement_pointer(current_pointer: str, exercise_points: list):
+    """Decrements the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
+    1. -> 1.  /  2.b -> 2.a  /  3. -> 2.b"""
+
+    (task, subtask) = current_pointer.split('.', 1)
+    # decrement the main task if the subtask is 'a' or ''
+    if (subtask == 'a' or subtask == '') and task != '1':
+        task = str(int(task) - 1)
+        subtask = chr(len(exercise_points[int(task) - 1]) + 96) if len(exercise_points[int(task) - 1]) != 1 else ''
+    # decrement just subtask
+    elif subtask != 'a' and subtask != '':
+        subtask = chr(ord(subtask) - 1)
+    return f'{task}.{subtask}'
+
+
+def get_index(current_file, exercise_pointer: str, start_index: int = 0):
     """Magic method to get the start index of an exercise in the feedback or solution file"""
 
     # defining match encasing, such as 1.)
     encase_match = lambda m: r'^[#%/(\t+-]* *' + str(m) + ' *[:.) \n+-]{1,3}'
 
-    index: int = 0
+    index = 0
     task, subtask = exercise_pointer.split('.', 1)
     # defining task and subtask identifier structure
     task_match = rf'''({'|'.join(taskString)})? *0?{task}'''
@@ -67,7 +82,7 @@ def get_index(current_file, exercise_pointer: str):
                 identifier_match = rf'''({task_match})? *{subtask_match}'''
                 if re.match(encase_match(identifier_match), line):
                     break
-            else:
+            elif index >= start_index:
                 break
         index += 1
     # detecting task and subtask identifier on the same line
@@ -75,7 +90,7 @@ def get_index(current_file, exercise_pointer: str):
         index = 0
         for line in current_file:
             # if a task match occurs, the loop is exited
-            if re.match(encase_match(rf'''{task_match} *{subtask_match}'''), line):
+            if re.match(encase_match(rf'''{task_match} *{subtask_match}'''), line) and index >= start_index:
                 break
             index += 1
     if index >= len(current_file) - 1:
@@ -94,11 +109,12 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
     solution = []
     if printing:
         print(exercise_pointer)
-    index = get_index(current_file, exercise_pointer)
+    index = get_index(current_file, exercise_pointer,
+                      start_index=get_index(current_file, decrement_pointer(exercise_pointer, exercise_points)))
     next_index = -1
     while int(exercise_pointer.split('.', 1)[0]) <= len(exercise_points) and next_index < 0:
         exercise_pointer = increment_pointer(exercise_pointer, exercise_points)
-        next_index = get_index(current_file, exercise_pointer)
+        next_index = get_index(current_file, exercise_pointer, start_index=index)
     if next_index == -1:
         next_index = len(current_file)
     while index < next_index:
@@ -190,9 +206,9 @@ def count_sublists(some_list: list):
     return sum(map(lambda x: len(x), some_list))
 
 
-def solution_exists(file: list, pointer):
+def solution_exists(file: list, pointer: str, ex_points: list):
     # checks if the person solved the exercise, i.e. there exists an exercise for the current pointer
-    return get_index(file, pointer) > 0
+    return get_index(file, pointer, start_index=get_index(file, decrement_pointer(pointer, ex_points))) > 0
 
 
 def get_input(message: str, input_type: str = 'boolean'):
