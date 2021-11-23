@@ -54,7 +54,7 @@ class Correction:
         if it is empty, new feedbacks are generated for that assignment number,
         otherwise the current progress is read from the save and restored"""
 
-        print('-- starting correction of assignment ' + str(self.assignment_number) + ' --')
+        print('--- STARTING CORRECTION OF ASSIGNMENT ' + str(self.assignment_number) + ' ---')
         # extract all solution files to one file per student
         corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
         # create templates for feedbacks in every attendant's directory who needs a correction
@@ -79,9 +79,12 @@ class Correction:
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
             self.start_correction()
+            print('--- CORRECTION DONE ---')
             self.__recalculate_points()
+            print('--- POINT RECALCULATION DONE ---')
             if not self.offline:
                 self.sync_all_feedbacks()
+                print('--- DATABASE UPDATE DONE ---')
         else:
             print("There is no one left to correct!")
 
