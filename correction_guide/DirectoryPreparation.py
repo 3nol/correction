@@ -55,10 +55,10 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
             if len(exercise_points[int(task) - 1]) > 1 else \
             exercise_points[int(task) - 1][0]
         # if there is a solution
-        if solution_exists(solution_content, pointer):
+        if solution_exists(solution_content, pointer, exercise_points):
             new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False) \
-                if solution_exists(old_solution, pointer) else []
+                if solution_exists(old_solution, pointer, exercise_points) else []
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
                 for line in new_exercise:
