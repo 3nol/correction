@@ -1,3 +1,5 @@
+import re
+
 from Utility import *
 from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
@@ -76,9 +78,10 @@ class Correction:
                 print('new feedback templates generated for' + student)
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
+            self.start_correction()
+            self.__recalculate_points()
             if not self.offline:
                 self.sync_all_feedbacks()
-            self.start_correction()
         else:
             print("There is no one left to correct!")
 
@@ -170,6 +173,22 @@ class Correction:
             # solution is correct -> give max. points
             points = possible_points
         return comment, points
+
+    def __recalculate_points(self):
+        for name in self.tutti_names:
+            total_points = 0
+            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+                      mode='r', errors='replace') as f:
+                file = f.readlines()
+            for i in range(3, len(file)):
+                points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}]')
+                if points.findall(file[i]):
+                    total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
+            file[1] = f'[{total_points}/10]\n'
+            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment03.txt',
+                      mode='w', errors='replace') as f:
+                f.writelines(file)
+            print('INFO: wrote feedback successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
 
     def sync_all_feedbacks(self):
         """Helper methods to synchronize all feedbacks with the database. Only works if the client has a connection"""
