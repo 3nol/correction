@@ -22,7 +22,7 @@ class FileDictionary:
             for entry in f.readlines():
                 if str(entry).strip() != '':
                     # check if line matches the FileDictionary structure
-                    if re.match(r'^[a-zA-Z0-9.,\- ]+ :: [a-zA-Z0-9.,\- ]+$', str(entry)):
+                    if re.match(r'^[a-zA-Z0-9.]+ :: .+$', str(entry)):
                         # get key and value and save them to self.dict
                         key, value = entry.split(' :: ', 1)
                         self.dictionary[key] = value
