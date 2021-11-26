@@ -38,28 +38,32 @@ class FileDictionary:
         with open(self.file_path, mode='w', errors='strict') as f:
             f.writelines(file_representation)
 
-    def get(self, key):
+    def get(self, key, errors=False):
         """Simple getter method to retrieve the value"""
         try:
             return self.__dictionary[key]
         except KeyError:
-            print('INFO: key was not found in the dictionary')
+            if errors:
+                print('ERROR: key was not found in the dictionary')
 
-    def insert(self, key: str, value: str, prefix: str = ''):
+    def insert(self, key: str, value: str, prefix: str = '', errors=False):
         """Inserts a key,value pair into the dictionary, if no key is specified one is created from the prefix"""
         if key == '':
             # if key is empty, a key is created by using the specified prefix and a unique number
             key = str(len(self.__dictionary))
         key = prefix + key
+        if errors and self.get(key, errors=False) is not None:
+            print('INFO: overwriting value for key: ' + key)
         self.__dictionary[key] = value
         # dictionary is sorted
         self.__dictionary = dict(sorted(self.__dictionary.items()))
         # syncing with the file
         self.__write_file()
 
-    def delete(self, key):
+    def delete(self, key, errors=False):
         """Deletes a key,value pair from the dictionary, then syncs it with the file"""
-        value = self.__dictionary[key]
-        del self.__dictionary[key]
-        self.__write_file()
-        return value
+        value = self.get(key, errors)
+        if value is not None:
+            del self.__dictionary[key]
+            self.__write_file()
+            return value
