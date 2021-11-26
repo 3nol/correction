@@ -45,11 +45,11 @@ class Correction:
                 f.write('')
         # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
         self.feedbacks = FileDictionary(feedback_file_path)
-        if self.feedbacks.get('_ass_number') != assignment_number:
+        if self.feedbacks.get('.ass_number') != assignment_number:
             if get_input(f'Should feedbacks.dict be overridden? [y/n]'):
                 with open(feedback_file_path, mode='w') as f:
                     f.write('')
-                self.feedbacks.insert('_ass_number', assignment_number)
+                self.feedbacks.insert('.ass_number', assignment_number)
             else:
                 exit(1)
 
@@ -179,6 +179,7 @@ class Correction:
                             'You can also load a stored feedback using \'>feedback_id\'.', 'text')
         if comment.startswith('>') and self.feedbacks.get(temp_pointer + '_' + comment[1:]):
             # feedback is loaded and split into 2 components: points and comment
+            print('INFO: feedback was loaded successfully')
             return self.feedbacks.get(temp_pointer + '_' + comment[1:]).split(', ', 1)
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
@@ -190,7 +191,7 @@ class Correction:
                 points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
                                    + str(possible_points) + ' are possible!', 'numeric')
                 # check validity of inputted points
-                if 0.0 <= points <= possible_points and re.match(r'^\d+\.?5?$', points):
+                if 0.0 <= points <= possible_points:
                     break
         else:
             # solution is correct -> give max. points

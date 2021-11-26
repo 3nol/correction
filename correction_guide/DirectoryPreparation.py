@@ -63,7 +63,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
             if new_exercise != old_exercise:
                 for line in new_exercise:
                     print(line)
-                print('-------- feedback for the old exercise ---------')
+                print('-------- feedback for the previous version of the assignment---------')
                 get_solution(feedback, pointer, exercise_points)
                 if not get_input('Is the feedback still correct? [y/n]'):
                     comment = get_input('Please enter some comments (without newlines!)', 'text')
