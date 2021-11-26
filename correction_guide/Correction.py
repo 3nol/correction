@@ -1,6 +1,7 @@
 from Utility import *
 from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
+from FileDictionary import FileDictionary
 
 
 def init_tutti_names(names: list, filepath=False):
@@ -36,6 +37,22 @@ class Correction:
         self.tutti_names: list = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
+        # storing feedbacks that were given
+        feedback_file_identifier: str = 'feedbacks'
+        feedback_file_path: str = trailing_os_sep(file_path) + feedback_file_identifier + '.dict'
+        # initializing feedback file
+        if not os.path.isfile(feedback_file_path):
+            with open(feedback_file_path, mode='w') as f:
+                f.write('')
+        # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
+        self.feedbacks = FileDictionary(feedback_file_path)
+        if self.feedbacks.get('_ass_number') != assignment_number:
+            if get_input(f'Should {feedback_file_identifier}.dict be overridden? [y/n]'):
+                with open(feedback_file_path, mode='w') as f:
+                    f.write('')
+                self.feedbacks.insert('_ass_number', assignment_number)
+            else:
+                exit(1)
 
     def get_status(self) -> str:
         # calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage
