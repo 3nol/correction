@@ -126,7 +126,7 @@ class Correction:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer, self.exercise_points):
                         get_solution(current_file, temp_pointer, self.exercise_points)
-                        comment, points = self.__correct_single_solution(temp_pointer, just_name)
+                        points, comment = self.__correct_single_solution(temp_pointer, just_name)
                     else:
                         if ''.join(current_file).strip() == '':
                             print(f'No solution file was found for assignment {self.assignment_number}.\n'
@@ -136,7 +136,7 @@ class Correction:
                                 print(line.strip())
                         if get_input('Is the task ' + temp_pointer + ' in the file? [y/n]'):
                             # start correction here
-                            comment, points = self.__correct_single_solution(temp_pointer, just_name)
+                            points, comment = self.__correct_single_solution(temp_pointer, just_name)
                         else:
                             points = 0
                             comment = 'No solution.'
@@ -175,7 +175,11 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
-        comment = get_input('Please enter some comments (without newlines!)', 'text')
+        comment = get_input('Please enter some comments (without newlines).\n'
+                            'You can also load a stored feedback using \'>feedback_id\'.', 'text')
+        if comment.startswith('>') and self.feedbacks.get(temp_pointer + '_' + comment[1:]):
+            # feedback is loaded and split into 2 components: points and comment
+            return self.feedbacks.get(temp_pointer + '_' + comment[1:]).split(', ', 1)
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
@@ -186,12 +190,13 @@ class Correction:
                 points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
                                    + str(possible_points) + ' are possible!', 'numeric')
                 # check validity of inputted points
-                if 0.0 <= points <= possible_points:
+                if 0.0 <= points <= possible_points and re.match(r'^\d+\.?5?$', points):
                     break
         else:
             # solution is correct -> give max. points
             points = possible_points
-        return comment, points
+        self.feedbacks.insert('', f'{points}, {comment}', prefix=temp_pointer + '_')
+        return points, comment
 
     def __recalculate_points(self):
         for name in self.tutti_names:
