@@ -210,7 +210,7 @@ def solution_exists(file: list, pointer: str, ex_points: list):
     return get_index(file, pointer, start_index=get_index(file, decrement_pointer(pointer, ex_points))) > 0
 
 
-def get_input(message: str, input_type: str = 'boolean'):
+def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
     """Retrieves an input from the console in a failsafe way"""
 
     while True:
@@ -220,7 +220,9 @@ def get_input(message: str, input_type: str = 'boolean'):
         elif input_type == 'numeric' and re.match(r'\d+(\.5)?', inp):
             return float(inp)
         elif input_type == 'text':
-            return textwrap.fill(str(inp), 80) if inp != '' else ' '
+            if text_wrap:
+                return textwrap.fill(str(inp), 80) if inp != '' else ' '
+            return str(inp)
         else:
             print('Invalid input, try again.')
 
