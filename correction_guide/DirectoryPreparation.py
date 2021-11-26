@@ -125,6 +125,18 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                 solutions_files.extend(map(lambda file: trailing_os_sep(path) + file, file_list))
         else:
             print('INFO: no solutions by', name)
+            while True:
+                files = get_input('Enter solution file paths (inside the student\'s directory), separated by comma.\n'
+                                  'Leave blank if no solution exists.',
+                                  input_type='text', text_wrap=False)
+                if files.strip() == '':
+                    break
+                files = list(map(lambda f: trailing_os_sep(name) + str(f).strip(), files.split(',')))
+                if all(map(os.path.isfile, files)):
+                    solutions_files.extend(files)
+                    break
+                else:
+                    print('INFO: at least one file does not exist, try again')
         tutti_solutions[name] = solutions_files
     return tutti_solutions
 
