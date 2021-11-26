@@ -38,8 +38,7 @@ class Correction:
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
         # storing feedbacks that were given
-        feedback_file_identifier: str = 'feedbacks'
-        feedback_file_path: str = trailing_os_sep(file_path) + feedback_file_identifier + '.dict'
+        feedback_file_path: str = trailing_os_sep(file_path) + 'feedbacks.dict'
         # initializing feedback file
         if not os.path.isfile(feedback_file_path):
             with open(feedback_file_path, mode='w') as f:
@@ -47,7 +46,7 @@ class Correction:
         # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
         self.feedbacks = FileDictionary(feedback_file_path)
         if self.feedbacks.get('_ass_number') != assignment_number:
-            if get_input(f'Should {feedback_file_identifier}.dict be overridden? [y/n]'):
+            if get_input(f'Should feedbacks.dict be overridden? [y/n]'):
                 with open(feedback_file_path, mode='w') as f:
                     f.write('')
                 self.feedbacks.insert('_ass_number', assignment_number)
@@ -206,10 +205,10 @@ class Correction:
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
             total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
-            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment03.txt',
+            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
                       mode='w', errors='replace') as f:
                 f.writelines(file)
-            print('INFO: wrote feedback successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
+            print('INFO: wrote feedback points successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
 
     def sync_all_feedbacks(self) -> bool:
         """Helper methods to synchronize all feedbacks with the database. Only works if the client has a connection"""
