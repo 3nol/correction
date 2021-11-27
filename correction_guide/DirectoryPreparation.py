@@ -1,9 +1,10 @@
 from glob import glob
 from Utility import *
 from Paths import corrector
+import FileDictionary
 
 
-def extract_solutions(ass_number: str, tutti_names: list) -> list:
+def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDictionary) -> list:
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
 
@@ -26,7 +27,7 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
             if os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
                 if "".join(solution_content) != "".join(old_concatenated_solution):
                     compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
-                                                           old_concatenated_solution)
+                                                           old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
         with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                   f'{ass_number}.txt', mode='w', errors='replace') as f:
@@ -35,7 +36,8 @@ def extract_solutions(ass_number: str, tutti_names: list) -> list:
     return corrected_students
 
 
-def compare_old_correction_to_new_solution(student_name: str, ass_number: str, solution_content: list, old_solution: list):
+def compare_old_correction_to_new_solution(student_name: str, ass_number: str, new_solution: list, old_solution: list,
+                                           feedbacks: FileDictionary):
     """Helps to correct a partial corrected assignment by cycling through all the tasks and subtasks
     which already have a feedback. If there are changes in the students solution, the solution and the corresponding
     feedback is printed"""
@@ -55,8 +57,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
             if len(exercise_points[int(task) - 1]) > 1 else \
             exercise_points[int(task) - 1][0]
         # if there is a solution
-        if solution_exists(solution_content, pointer, exercise_points):
-            new_exercise = get_solution(solution_content, pointer, exercise_points, printing=False)
+        if solution_exists(new_solution, pointer, exercise_points):
+            new_exercise = get_solution(new_solution, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False) \
                 if solution_exists(old_solution, pointer, exercise_points) else []
             # if there is a difference between the two exercises
@@ -66,30 +68,41 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, s
                 print('-------- feedback for the previous version of the assignment---------')
                 get_solution(feedback, pointer, exercise_points)
                 if not get_input('Is the feedback still correct? [y/n]'):
-                    comment = get_input('Please enter some comments (without newlines!)', 'text')
+                    # if feedback is not appropriate anymore, a comment is asked for again
+                    loaded, comment = load_feedback(feedbacks, pointer)
+                    if loaded:
+                        print('INFO: feedback was loaded successfully')
+                        points, comment = comment.split(', ', 1)
+                    else:
+                        while True:
+                            points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
+                                               + str(possible_points) + ' are possible!', 'numeric')
+                            # check validity of inputted points
+                            if 0.0 <= points <= possible_points:
+                                break
+                        feedbacks.insert('', f'{points}, {comment}', prefix=pointer + '_')
+                    delete_old_feedback(feedback_path, pointer, exercise_points)
+                    new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
+                    insert_in_db(just_name, ass_number, new_total_points)
+                    update_db()
+        # if there is no solution i could have been deleted and therefore we ask if the task is still there
+        else:
+            for line in new_solution:
+                print(line)
+            if get_input('Is the task ' + pointer + ' in the file? [y/n]'):
+                # start correction here
+                loaded, comment = load_feedback(feedbacks, pointer)
+                if loaded:
+                    print('INFO: feedback was loaded successfully')
+                    points, comment = comment.split(', ', 1)
+                else:
                     while True:
                         points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
                                            + str(possible_points) + ' are possible!', 'numeric')
                         # check validity of inputted points
                         if 0.0 <= points <= possible_points:
                             break
-                    delete_old_feedback(feedback_path, pointer, exercise_points)
-                    new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
-                    insert_in_db(just_name, ass_number, new_total_points)
-                    update_db()
-        # if there is no solution i could have been deleted and therefore we just give 0 points
-        else:
-            for line in solution_content:
-                print(line)
-            if get_input('Is the task ' + pointer + ' in the file? [y/n]'):
-                # start correction here
-                comment = get_input('Please enter some comments (without newlines!)', 'text')
-                while True:
-                    points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
-                                       + str(possible_points) + ' are possible!', 'numeric')
-                    # check validity of inputted points
-                    if 0.0 <= points <= possible_points:
-                        break
+                    feedbacks.insert('', f'{points}, {comment}', prefix=pointer + '_')
             else:
                 points = 0
                 comment = 'No solution.'
