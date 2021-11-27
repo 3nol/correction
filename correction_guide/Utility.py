@@ -227,6 +227,22 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
             print('Invalid input, try again.')
 
 
+def load_feedback(feedbacks, pointer):
+    """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id"""
+
+    while True:
+        comment = get_input('Please enter some comments (without newlines).\n'
+                            'You can also load a stored feedback using \'>feedback_id\'.', 'text')
+        if comment.startswith('>'):
+            if feedbacks.get(pointer + '_' + comment[1:]) is not None:
+                # feedback entry is returned
+                return True, feedbacks.get(pointer + '_' + comment[1:])
+            else:
+                print('INFO: feedback was not found, try again')
+                continue
+        return False, comment
+
+
 def is_db_available() -> bool:
     """Helper method to check for the database connection"""
 
