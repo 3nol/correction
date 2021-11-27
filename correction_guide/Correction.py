@@ -69,7 +69,7 @@ class Correction:
 
         print('--- STARTING CORRECTION OF ASSIGNMENT ' + str(self.assignment_number) + ' ---')
         # extract all solution files to one file per student
-        corrected_students = extract_solutions(self.assignment_number, self.tutti_names)
+        corrected_students = extract_solutions(self.assignment_number, self.tutti_names, self.feedbacks)
         # create templates for feedbacks in every attendant's directory who needs a correction
         start_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
         for student in self.tutti_names:
@@ -175,12 +175,11 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
-        comment = get_input('Please enter some comments (without newlines).\n'
-                            'You can also load a stored feedback using \'>feedback_id\'.', 'text')
-        if comment.startswith('>') and self.feedbacks.get(temp_pointer + '_' + comment[1:]):
+        loaded, comment = load_feedback(self.feedbacks, temp_pointer)
+        if loaded:
             # feedback is loaded and split into 2 components: points and comment
             print('INFO: feedback was loaded successfully')
-            return self.feedbacks.get(temp_pointer + '_' + comment[1:]).split(', ', 1)
+            return comment.split(', ', 1)
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
