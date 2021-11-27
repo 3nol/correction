@@ -190,7 +190,8 @@ class Correction:
         else:
             # solution is correct -> give max. points
             points = possible_points
-        self.feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=temp_pointer + '_')
+        self.feedbacks.insert('', str(points).split('.0', 1)[0] + ', ' + comment.replace('\n', ' '),
+                              prefix=temp_pointer + '_')
         return points, comment
 
     def __recalculate_points(self):

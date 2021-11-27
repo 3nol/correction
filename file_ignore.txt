@@ -5,3 +5,5 @@
 bibel.txt
 .*SPAMTRUE.*
 .*SPAMFALSE.*
+adult.data
+adult.names
