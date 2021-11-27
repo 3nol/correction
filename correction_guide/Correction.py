@@ -177,9 +177,7 @@ class Correction:
 
         loaded, comment = load_feedback(self.feedbacks, temp_pointer)
         if loaded:
-            # feedback is loaded and split into 2 components: points and comment
-            print('INFO: feedback was loaded successfully')
-            return comment.split(', ', 1)
+            return comment
         (task, subtask) = temp_pointer.split('.', 1)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
@@ -195,7 +193,7 @@ class Correction:
         else:
             # solution is correct -> give max. points
             points = possible_points
-        self.feedbacks.insert('', f'{points}, {comment}', prefix=temp_pointer + '_')
+        self.feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=temp_pointer + '_')
         return points, comment
 
     def __recalculate_points(self):

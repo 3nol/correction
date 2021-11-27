@@ -71,8 +71,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                     # if feedback is not appropriate anymore, a comment is asked for again
                     loaded, comment = load_feedback(feedbacks, pointer)
                     if loaded:
-                        print('INFO: feedback was loaded successfully')
-                        points, comment = comment.split(', ', 1)
+                        points, comment = comment
                     else:
                         while True:
                             points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
@@ -80,7 +79,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                             # check validity of inputted points
                             if 0.0 <= points <= possible_points:
                                 break
-                        feedbacks.insert('', f'{points}, {comment}', prefix=pointer + '_')
+                        feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
                     delete_old_feedback(feedback_path, pointer, exercise_points)
                     new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
                     insert_in_db(just_name, ass_number, new_total_points)
@@ -93,8 +92,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                 # start correction here
                 loaded, comment = load_feedback(feedbacks, pointer)
                 if loaded:
-                    print('INFO: feedback was loaded successfully')
-                    points, comment = comment.split(', ', 1)
+                    points, comment = comment
                 else:
                     while True:
                         points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
@@ -102,7 +100,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                         # check validity of inputted points
                         if 0.0 <= points <= possible_points:
                             break
-                    feedbacks.insert('', f'{points}, {comment}', prefix=pointer + '_')
+                    feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
             else:
                 points = 0
                 comment = 'No solution.'
