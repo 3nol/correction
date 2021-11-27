@@ -12,7 +12,7 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
     corrected_students = []
     for student_name in solution_files:
         solution_content = []
-        for file in solution_files[student_name]:
+        for file in sorted(solution_files[student_name]):
             if not is_ignored_file(file):
                 with open(file, mode='r', errors='replace') as f:
                     solution_content.extend(f.readlines())
