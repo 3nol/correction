@@ -227,7 +227,7 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
             print('Invalid input, try again.')
 
 
-def load_feedback(feedbacks, pointer):
+def load_feedback(feedbacks, pointer) -> (bool, any):
     """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id"""
 
     while True:
@@ -235,8 +235,10 @@ def load_feedback(feedbacks, pointer):
                             'You can also load a stored feedback using \'>feedback_id\'.', 'text')
         if comment.startswith('>'):
             if feedbacks.get(pointer + '_' + comment[1:]) is not None:
-                # feedback entry is returned
-                return True, feedbacks.get(pointer + '_' + comment[1:])
+                # feedback is loaded and split into 2 components: points and comment
+                print('INFO: feedback was loaded successfully')
+                p, c = feedbacks.get(pointer + '_' + comment[1:]).split(', ', 1)
+                return True, (p, textwrap.fill(c, 80))
             else:
                 print('INFO: feedback was not found, try again')
                 continue
