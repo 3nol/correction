@@ -74,28 +74,30 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                 print(line)
             solution_status = 1 if get_input('Is the task ' + pointer + ' in the file? [y/n]') else 2
         # handling the solution status: 1 -> new correction, 2 -> insert 0 points in feedback
+        points = 0
+        comment = 'No solution.'
+        if solution_status == 1:
+            print('\n-------- feedback for the previous version ---------\n')
+            get_solution(feedback, pointer, exercise_points)
+            if not get_input('Is the feedback still correct? [y/n]'):
+                # if feedback is not appropriate anymore, a comment is asked for again
+                loaded, comment = load_feedback(feedbacks, pointer)
+                if loaded:
+                    points, comment = comment
+                elif get_input('Is the solution correct? [y/n]'):
+                    while True:
+                        points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
+                                           + str(possible_points) + ' are possible!', 'numeric')
+                        # check validity of inputted points
+                        if 0.0 <= points <= possible_points:
+                            break
+                        feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
+                else:
+                    # solution is correct -> give max. points
+                    points = possible_points
+            else:
+                solution_status = 0
         if solution_status > 0:
-            points = 0
-            comment = 'No solution.'
-            if solution_status == 1:
-                print('\n-------- feedback for the previous version ---------\n')
-                get_solution(feedback, pointer, exercise_points)
-                if not get_input('Is the feedback still correct? [y/n]'):
-                    # if feedback is not appropriate anymore, a comment is asked for again
-                    loaded, comment = load_feedback(feedbacks, pointer)
-                    if loaded:
-                        points, comment = comment
-                    elif get_input('Is the solution correct? [y/n]'):
-                        while True:
-                            points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
-                                               + str(possible_points) + ' are possible!', 'numeric')
-                            # check validity of inputted points
-                            if 0.0 <= points <= possible_points:
-                                break
-                            feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
-                    else:
-                        # solution is correct -> give max. points
-                        points = possible_points
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
             insert_in_db(just_name, ass_number, new_total_points)
