@@ -84,7 +84,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                 loaded, comment = load_feedback(feedbacks, pointer)
                 if loaded:
                     points, comment = comment
-                elif get_input('Is the solution correct? [y/n]'):
+                elif not get_input('Is the solution correct? [y/n]'):
                     while True:
                         points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
                                            + str(possible_points) + ' are possible!', 'numeric')
