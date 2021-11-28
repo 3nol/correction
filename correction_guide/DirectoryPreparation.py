@@ -56,6 +56,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
             if len(exercise_points[int(task) - 1]) > 1 else \
             exercise_points[int(task) - 1][0]
+        # solution status indicator: 0 = nothing changed, 1 = changes present, 2 = no solution
+        solution_status = 0
         # if there is a solution
         if solution_exists(new_solution, pointer, exercise_points):
             new_exercise = get_solution(new_solution, pointer, exercise_points, printing=False)
@@ -65,45 +67,35 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
             if new_exercise != old_exercise:
                 for line in new_exercise:
                     print(line)
-                print('-------- feedback for the previous version of the assignment---------')
+                solution_status = 1
+        # if there is no solution i could have been deleted and therefore we ask if the task is still there
+        else:
+            for line in new_solution:
+                print(line)
+            solution_status = 1 if get_input('Is the task ' + pointer + ' in the file? [y/n]') else 2
+        # handling the solution status: 1 -> new correction, 2 -> insert 0 points in feedback
+        if solution_status > 0:
+            points = 0
+            comment = 'No solution.'
+            if solution_status == 1:
+                print('\n-------- feedback for the previous version ---------\n')
                 get_solution(feedback, pointer, exercise_points)
                 if not get_input('Is the feedback still correct? [y/n]'):
                     # if feedback is not appropriate anymore, a comment is asked for again
                     loaded, comment = load_feedback(feedbacks, pointer)
                     if loaded:
                         points, comment = comment
-                    else:
+                    elif get_input('Is the solution correct? [y/n]'):
                         while True:
-                            points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
+                            points = get_input('How many points should ' + just_name + ' get for this exercise?\n'
                                                + str(possible_points) + ' are possible!', 'numeric')
                             # check validity of inputted points
                             if 0.0 <= points <= possible_points:
                                 break
-                        feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
-                    delete_old_feedback(feedback_path, pointer, exercise_points)
-                    new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
-                    insert_in_db(just_name, ass_number, new_total_points)
-                    update_db()
-        # if there is no solution i could have been deleted and therefore we ask if the task is still there
-        else:
-            for line in new_solution:
-                print(line)
-            if get_input('Is the task ' + pointer + ' in the file? [y/n]'):
-                # start correction here
-                loaded, comment = load_feedback(feedbacks, pointer)
-                if loaded:
-                    points, comment = comment
-                else:
-                    while True:
-                        points = get_input('How many points should get ' + just_name + ' for this exercise?\n'
-                                           + str(possible_points) + ' are possible!', 'numeric')
-                        # check validity of inputted points
-                        if 0.0 <= points <= possible_points:
-                            break
-                    feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
-            else:
-                points = 0
-                comment = 'No solution.'
+                            feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
+                    else:
+                        # solution is correct -> give max. points
+                        points = possible_points
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
             insert_in_db(just_name, ass_number, new_total_points)
