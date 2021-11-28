@@ -151,6 +151,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         current_file = file.readlines()
     index = get_index(current_file, pointer)
     next_index = get_index(current_file, increment_pointer(pointer, exercise_points))
+    next_index = len(current_file) if next_index == -1 else next_index
     points = float(current_file[index].split('/', 1)[0].split('[', 1)[1])
     total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
     current_file[index] = re.sub(r'\[[0-9](.5)?/', '[0/', current_file[index])
