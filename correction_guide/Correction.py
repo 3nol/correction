@@ -92,13 +92,13 @@ class Correction:
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
             self.start_correction()
-            print('--- CORRECTION DONE ---')
-            self.__recalculate_points()
-            print('--- POINT RECALCULATION DONE ---')
-            if self.sync_all_feedbacks():
-                print('--- DATABASE UPDATE DONE ---')
         else:
             print("There is no one left to correct!")
+        print('--- CORRECTION DONE ---')
+        self.__recalculate_points()
+        print('--- POINT RECALCULATION DONE ---')
+        if self.sync_all_feedbacks():
+            print('--- DATABASE UPDATE DONE ---')
 
     def start_correction(self):
         """Does the sequential correction process by cycling through each task (and its subtasks)
