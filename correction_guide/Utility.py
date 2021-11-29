@@ -29,11 +29,21 @@ def get_configured_exercise_points(ass_number: str):
     return exercise_points
 
 
+def split_pointer(pointer: str):
+    """Small helper function that splits an exercise pointer into task, subtask without throwing an error"""
+
+    splitted = pointer.split('.', 1)
+    if len(splitted) == 2:
+        return splitted[0], splitted[1]
+    else:
+        return splitted[0], ''
+
+
 def increment_pointer(current_pointer: str, exercise_points: list):
     """Increments the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
     1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3."""
 
-    (task, subtask) = current_pointer.split('.', 1)
+    task, subtask = split_pointer(current_pointer)
     # increment main task when there were no subtasks before or all previous subtasks are done
     if subtask == '' or len(exercise_points[int(task) - 1]) <= ord(subtask) - 96:
         task = str(int(task) + 1)
@@ -49,7 +59,7 @@ def decrement_pointer(current_pointer: str, exercise_points: list):
     """Decrements the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
     1. -> 1.  /  2.b -> 2.a  /  3. -> 2.b"""
 
-    (task, subtask) = current_pointer.split('.', 1)
+    task, subtask = split_pointer(current_pointer)
     # decrement the main task if the subtask is 'a' or ''
     if (subtask == 'a' or subtask == '') and task != '1':
         task = str(int(task) - 1)
@@ -67,7 +77,7 @@ def get_index(current_file, exercise_pointer: str, start_index: int = 0):
     encase_match = lambda m: r'^[#%/(\t+-]* *' + str(m) + ' *[:.) \n+-]{1,3}'
 
     index = 0
-    task, subtask = exercise_pointer.split('.', 1)
+    task, subtask = split_pointer(exercise_pointer)
     # defining task and subtask identifier structure
     task_match = rf'''({'|'.join(taskString)})? *0?{task}'''
     subtask_match = rf'''({'|'.join(subtaskString)})? *({subtask}|{str(subtask).upper()})'''
@@ -108,7 +118,7 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
     solution = []
     if printing:
         print(exercise_pointer)
-    task, subtask = exercise_pointer.split(',', 1)
+    task, subtask = split_pointer(exercise_pointer)
     prev_index = 0 if task == '1' and subtask in ['', 'a'] \
         else get_index(current_file, decrement_pointer(exercise_pointer, exercise_points))
     index = get_index(current_file, exercise_pointer, start_index=prev_index)
@@ -152,14 +162,17 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     with open(file_path, mode='r', errors='replace') as file:
         current_file = file.readlines()
     index = get_index(current_file, pointer)
-    next_index = get_index(current_file, increment_pointer(pointer, exercise_points))
+    next_pointer = increment_pointer(pointer, exercise_points)
+    next_index = get_index(current_file, next_pointer)
     next_index = len(current_file) if next_index == -1 else next_index
+
     points = float(current_file[index].split('/', 1)[0].split('[', 1)[1])
     total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
     current_file[index] = re.sub(r'\[[0-9](.5)?/', '[0/', current_file[index])
     index += 1
-    # - 1 because there is always 1 blank line
-    while index < next_index - 1:
+    # there is always 1 blank line between subtasks and 2 blank lines between tasks (3 because of Task X headline)
+    blanks = 1 if pointer[0] == next_pointer[0] else 3
+    while index < next_index - blanks:
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)

@@ -79,7 +79,7 @@ class Correction:
                 # if there is still something left so correct
                 if corrected_pointer != -1:
                     self.task_queue.insert_at_pointer(student, corrected_pointer)
-                    c_task, c_subtask = corrected_pointer.split('.', 1)
+                    c_task, c_subtask = split_pointer(corrected_pointer)
                     self.corrected_task_amount += count_sublists(self.exercise_points[:(int(c_task) - 1)])
                     if c_subtask != '':
                         self.corrected_task_amount += ord(c_subtask) - 97
@@ -175,7 +175,7 @@ class Correction:
         loaded, comment = load_feedback(self.feedbacks, temp_pointer)
         if loaded:
             return comment
-        (task, subtask) = temp_pointer.split('.', 1)
+        task, subtask = split_pointer(temp_pointer)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = self.exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
             if len(self.exercise_points[int(task) - 1]) > 1 else \
