@@ -51,7 +51,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
     # loop while there is still a feedback or no more exercises
     while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
-        (task, subtask) = pointer.split('.', 1)
+        task, subtask = split_pointer(pointer)
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
             if len(exercise_points[int(task) - 1]) > 1 else \
