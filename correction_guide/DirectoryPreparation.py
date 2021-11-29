@@ -65,6 +65,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                 if solution_exists(old_solution, pointer, exercise_points) else []
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
+                print('\n')
                 for line in new_exercise:
                     print(line)
                 solution_status = 1
@@ -77,7 +78,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         points = 0
         comment = 'No solution.'
         if solution_status == 1:
-            print('\n-------- feedback for the previous version ---------\n')
+            print('\nFeedback for the previous version:\n')
             get_solution(feedback, pointer, exercise_points)
             if not get_input('Is the feedback still correct? [y/n]'):
                 # if feedback is not appropriate anymore, a comment is asked for again
