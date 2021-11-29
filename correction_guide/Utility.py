@@ -219,7 +219,7 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
     while True:
         inp = str(input(message + '\n'))
         if input_type == 'boolean' and inp.lower() in ['n', 'y']:
-            return inp == 'y'
+            return inp.lower() == 'y'
         elif input_type == 'numeric' and re.match(r'\d+(\.5)?', inp):
             return float(inp)
         elif input_type == 'text':
