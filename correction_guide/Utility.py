@@ -108,8 +108,10 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
     solution = []
     if printing:
         print(exercise_pointer)
-    index = get_index(current_file, exercise_pointer,
-                      start_index=get_index(current_file, decrement_pointer(exercise_pointer, exercise_points)))
+    task, subtask = exercise_pointer.split(',', 1)
+    prev_index = 0 if task == '1' and subtask in ['', 'a'] \
+        else get_index(current_file, decrement_pointer(exercise_pointer, exercise_points))
+    index = get_index(current_file, exercise_pointer, start_index=prev_index)
     next_index = -1
     while int(exercise_pointer.split('.', 1)[0]) <= len(exercise_points) and next_index < 0:
         exercise_pointer = increment_pointer(exercise_pointer, exercise_points)
