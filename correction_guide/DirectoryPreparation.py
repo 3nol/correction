@@ -1,6 +1,7 @@
 from glob import glob
 from Utility import *
 from Paths import corrector
+from directory_tree import display_tree
 import FileDictionary
 
 
@@ -131,6 +132,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                 solutions_files.extend(map(lambda file: trailing_os_sep(path) + file, file_list))
         else:
             print('INFO: no solutions by', str(name).rsplit(os.path.sep, 1)[1])
+            print(remove_hidden_folders(display_tree(name, string_rep=True)))
             while True:
                 files = get_input('Enter solution file paths (inside the student\'s directory), separated by comma.\n'
                                   'Leave blank if no solution exists.',
@@ -191,3 +193,20 @@ def is_ignored_file(file_path: str) -> bool:
         if re.match(ig, file_name):
             return True
     return False
+
+
+def remove_hidden_folders(structure):
+    delete = False
+    index_dot = 0
+    lines = structure.split('\n')
+    for s in structure.split('\n'):
+        if not delete and re.match('.*├── \.[a-zA-Z_]+', s):
+            lines.remove(s)
+            index_dot = len(s.split('├── ')[0]) + 3
+            delete = True
+        elif delete:
+            if (len(s.split('├── ')[0]) + 3) <= index_dot and not re.match('.*├── \.[a-zA-Z_]+', s):
+                delete = False
+            else:
+                lines.remove(s)
+    return '\n'.join(lines)
