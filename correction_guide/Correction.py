@@ -24,7 +24,7 @@ class Correction:
     - Correction-process: sequential go-through of exercises of all tuttis
     A progress save file is written to the filepath/correct_tmp.txt"""
 
-    def __init__(self, file_path: str, assignment_number: str):
+    def __init__(self, file_path: str, assignment_number: str, tutti_names: list = []):
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.file_path: str = file_path
@@ -34,7 +34,8 @@ class Correction:
         # getting points distribution from config file 'assignment_config.txt'
         self.exercise_points: list = get_configured_exercise_points(self.assignment_number)
         # flat-mapping all names of tutorial attendants
-        self.tutti_names: list = [f.path for f in os.scandir(self.file_path) if f.is_dir() and '***REMOVED***' not in f.path]
+        self.tutti_names: list = [f.path for f in os.scandir(self.file_path) if f.is_dir()
+                                  and '***REMOVED***' not in f.path] if tutti_names == [] else tutti_names
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
         # storing feedbacks that were given
