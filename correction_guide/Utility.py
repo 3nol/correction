@@ -223,7 +223,7 @@ def count_sublists(some_list: list):
 
 def solution_exists(file: list, pointer: str, ex_points: list):
     # checks if the person solved the exercise, i.e. there exists an exercise for the current pointer
-    return get_index(file, pointer, start_index=get_index(file, decrement_pointer(pointer, ex_points))) > 0
+    return get_index(file, pointer, start_index=get_index(file, decrement_pointer(pointer, ex_points))) >= 0
 
 
 def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
