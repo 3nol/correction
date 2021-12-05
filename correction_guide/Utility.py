@@ -127,12 +127,11 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
         exercise_pointer = increment_pointer(exercise_pointer, exercise_points)
         next_index = get_index(current_file, exercise_pointer, start_index=index)
     if next_index == -1:
-        next_index = len(current_file)
-    while index < next_index:
+        next_index = len(current_file) + 1
+    while index < next_index - 1:
         if printing:
             print(current_file[index].strip())
-        else:
-            solution.append(current_file[index].strip())
+        solution.append(current_file[index].strip())
         index += 1
     return solution
 
