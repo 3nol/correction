@@ -42,14 +42,14 @@ class Correction:
         feedback_file_path: str = trailing_os_sep(file_path) + 'feedbacks.dict'
         # initializing feedback file
         if not os.path.isfile(feedback_file_path):
-            with open(feedback_file_path, mode='w') as f:
-                f.write('')
+            # creating an empty file
+            open(feedback_file_path, mode='w').close()
         # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
         self.feedbacks = FileDictionary(feedback_file_path)
         if self.feedbacks.get('.ass_number') != assignment_number:
             if get_input(f'Should feedbacks.dict be overridden? [y/n]'):
-                with open(feedback_file_path, mode='w') as f:
-                    f.write('')
+                # erasing all content from file
+                open(feedback_file_path, mode='w').close()
                 self.feedbacks.insert('.ass_number', assignment_number)
             else:
                 exit(1)
