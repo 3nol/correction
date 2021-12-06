@@ -9,7 +9,7 @@ def init_tutti_names(names: list, filepath=False):
     If filepath=True and the list holds one entry, its content is used as a filepath to retrieves the names there"""
 
     if filepath:
-        with open(names[0], mode='r', errors='replace') as f:
+        with open(names[0], mode='r', errors='replace', encoding='utf-8') as f:
             names = list(filter(lambda x: x not in ['***REMOVED***', '***REMOVED***', '***REMOVED***'],
                             map(lambda x: str(x).strip(), f.readlines())))
     for name in names:
@@ -123,7 +123,7 @@ class Correction:
                     # a difference to the empty solution sheet
                     solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment' \
                                     f'{self.assignment_number}.txt'
-                    with open(solution_path, mode='r', errors='replace') as f:
+                    with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer, self.exercise_points):
                         get_solution(current_file, temp_pointer, self.exercise_points)
@@ -155,7 +155,7 @@ class Correction:
 
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
         with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
-                  mode='r', errors='replace') as f:
+                  mode='r', errors='replace', encoding='utf-8') as f:
             feedback = f.readlines()
         while True:
             index = get_index(feedback, feedback_pointer)
@@ -199,7 +199,7 @@ class Correction:
         for name in self.tutti_names:
             total_points = 0
             with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
-                      mode='r', errors='replace') as f:
+                      mode='r', errors='replace', encoding='utf-8') as f:
                 file = f.readlines()
             for i in range(3, len(file)):
                 points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}]')
@@ -208,7 +208,7 @@ class Correction:
             total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
             with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
-                      mode='w', errors='replace') as f:
+                      mode='w', errors='replace', encoding='utf-8') as f:
                 f.writelines(file)
             print('INFO: wrote feedback points successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
 
@@ -218,7 +218,7 @@ class Correction:
         if is_db_available():
             for name in self.tutti_names:
                 with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
-                          mode='r', errors='replace') as f:
+                          mode='r', errors='replace', encoding='utf-8') as f:
                     insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                  str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
             update_db()

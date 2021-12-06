@@ -153,7 +153,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + new_total)
-    with open(file_path, mode='w', errors='replace') as file:
+    with open(file_path, mode='w', errors='replace', encoding='utf-8') as file:
         file.writelines(current_file)
     return new_total
 
@@ -197,7 +197,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
-    with open(file_path, mode='w', errors='replace') as file:
+    with open(file_path, mode='w', errors='replace', encoding='utf-8') as file:
         file.writelines(current_file)
 
 
@@ -211,7 +211,7 @@ def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.
         print('inserting points for assignment', ass_number + ':')
         for name in tutti_names:
             with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
-                      mode='r', errors='replace') as f:
+                      mode='r', errors='replace', encoding='utf-8') as f:
                 total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
             insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
             print('-', str(name).rsplit(os.path.sep, 1)[1], total)
