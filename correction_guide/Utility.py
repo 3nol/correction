@@ -82,6 +82,7 @@ def get_index(current_file, exercise_pointer: str, start_index: int = 0):
     task_match = rf'''({'|'.join(taskString)})? *0?{task}'''
     subtask_match = rf'''({'|'.join(subtaskString)})? *({subtask}|{str(subtask).upper()})'''
     identifier_match = task_match
+    found = False
     # detecting separate task and subtask identifier
     for line in current_file:
         # if a task match occurs, match is changed to subtask match, if it matches again, the loop is exited
@@ -90,19 +91,22 @@ def get_index(current_file, exercise_pointer: str, start_index: int = 0):
             if subtask != identifier_match[-4] and subtask != '':
                 identifier_match = rf'''({task_match})? *{subtask_match}'''
                 if re.match(encase_match(identifier_match), line):
+                    found = True
                     break
             elif index >= start_index:
+                found = True
                 break
         index += 1
     # detecting task and subtask identifier on the same line
-    if index >= len(current_file) - 1:
+    if index >= len(current_file) - 1 and not found:
         index = 0
         for line in current_file:
             # if a task match occurs, the loop is exited
             if re.match(encase_match(rf'''{task_match} *{subtask_match}'''), line) and index >= start_index:
+                found = True
                 break
             index += 1
-    if index >= len(current_file) - 1:
+    if index >= len(current_file) - 1 and not found:
         index = -1
     return index
 
@@ -127,8 +131,8 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
         exercise_pointer = increment_pointer(exercise_pointer, exercise_points)
         next_index = get_index(current_file, exercise_pointer, start_index=index)
     if next_index == -1:
-        next_index = len(current_file) + 1
-    while index < next_index - 1:
+        next_index = len(current_file)
+    while index < next_index:
         if printing:
             print(current_file[index].strip())
         solution.append(current_file[index].strip())
@@ -143,15 +147,15 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     with open(file_path, mode='r', errors='replace') as file:
         current_file = file.readlines()
     # preparing point amounts
-    total = str(float(current_file[1][1:].split('/', 1)[0]) + float(points)).split('.0', 1)[0]
+    new_total = str(float(current_file[1][1:].split('/', 1)[0]) + float(points)).split('.0', 1)[0]
     points = points.split('.0', 1)[0]
     index = get_index(current_file, exercise_pointer)
     current_file[index] = current_file[index].replace('[0/', '[' + points + '/', 1)
     current_file.insert(index + 1, text + '\n')
-    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
+    current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + new_total)
     with open(file_path, mode='w', errors='replace') as file:
         file.writelines(current_file)
-    return total
+    return new_total
 
 
 def load_feedback(feedbacks, pointer) -> (bool, any):
