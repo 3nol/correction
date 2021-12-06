@@ -154,6 +154,24 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     return total
 
 
+def load_feedback(feedbacks, pointer) -> (bool, any):
+    """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id"""
+
+    while True:
+        comment = get_input('Please enter some comments (without newlines).\n'
+                            'You can also load a stored feedback using \'>feedback_id\'.', 'text')
+        if comment.startswith('>'):
+            if feedbacks.get(pointer + '_' + comment[1:]) is not None:
+                # feedback is loaded and split into 2 components: points and comment
+                print('INFO: feedback was loaded successfully')
+                p, c = feedbacks.get(pointer + '_' + comment[1:]).split(', ', 1)
+                return True, (p, textwrap.fill(c, 80))
+            else:
+                print('INFO: feedback was not found, try again')
+                continue
+        return False, comment
+
+
 def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     """To delete the feedback of a task or subtask from a feedback_file. Removing the previous given
     points from the total points and setting the points from the task to 0 """
@@ -163,15 +181,15 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     index = get_index(current_file, pointer)
     next_pointer = increment_pointer(pointer, exercise_points)
     next_index = get_index(current_file, next_pointer)
-    next_index = len(current_file) if next_index == -1 else next_index
+    next_index = len(current_file) + 1 if next_index == -1 else next_index
 
     points = float(current_file[index].split('/', 1)[0].split('[', 1)[1])
     total = str(float(current_file[1][1:].split('/', 1)[0]) - points).split('.0', 1)[0]
     current_file[index] = re.sub(r'\[[0-9](.5)?/', '[0/', current_file[index])
     index += 1
     # there is always 1 blank line between subtasks and 2 blank lines between tasks (3 because of Task X headline)
-    blanks = 1 if pointer[0] == next_pointer[0] else 3
-    while index < next_index - blanks:
+    blanks = 1 if pointer[0] == next_pointer[0] or int(pointer[0]) == len(exercise_points) else 3
+    while index < next_index - blanks and index < len(current_file):
         current_file[index] = ''
         index += 1
     current_file[1] = current_file[1].replace(current_file[1].split('/', 1)[0], '[' + total)
@@ -240,24 +258,6 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
             return str(inp)
         else:
             print('Invalid input, try again.')
-
-
-def load_feedback(feedbacks, pointer) -> (bool, any):
-    """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id"""
-
-    while True:
-        comment = get_input('Please enter some comments (without newlines).\n'
-                            'You can also load a stored feedback using \'>feedback_id\'.', 'text')
-        if comment.startswith('>'):
-            if feedbacks.get(pointer + '_' + comment[1:]) is not None:
-                # feedback is loaded and split into 2 components: points and comment
-                print('INFO: feedback was loaded successfully')
-                p, c = feedbacks.get(pointer + '_' + comment[1:]).split(', ', 1)
-                return True, (p, textwrap.fill(c, 80))
-            else:
-                print('INFO: feedback was not found, try again')
-                continue
-        return False, comment
 
 
 def is_db_available() -> bool:
