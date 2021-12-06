@@ -18,7 +18,7 @@ class FileDictionary:
 
     def __parse_file(self):
         """Parses the dictionary contents of the file in the format 'key :: value' and saves them to self.dict"""
-        with open(self.file_path, mode='r', errors='strict') as f:
+        with open(self.file_path, mode='r', errors='strict', encoding='utf-8') as f:
             for entry in f.readlines():
                 if str(entry).strip() != '':
                     # check if line matches the FileDictionary structure
@@ -35,7 +35,7 @@ class FileDictionary:
         for key, value in self.__dictionary.items():
             # creating a string representation of the dictionary
             file_representation.append(f'{key} :: {value}\n')
-        with open(self.file_path, mode='w', errors='strict') as f:
+        with open(self.file_path, mode='w', errors='strict', encoding='utf-8') as f:
             f.writelines(file_representation)
 
     def get(self, key, errors=False):

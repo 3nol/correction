@@ -15,14 +15,14 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
         solution_content = []
         for file in sorted(solution_files[student_name]):
             if not is_ignored_file(file):
-                with open(file, mode='r', errors='replace') as f:
+                with open(file, mode='r', errors='replace', encoding='utf-8') as f:
                     solution_content.extend(f.readlines())
                 solution_content.append('\n')
         # saving the old file to check for changes
         if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                           f'{ass_number}.txt'):
             with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                      f'{ass_number}.txt', mode='r', errors='replace') as f:
+                      f'{ass_number}.txt', mode='r', errors='replace', encoding='utf-8') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
             if os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
@@ -31,7 +31,7 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
                                                            old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
         with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                  f'{ass_number}.txt', mode='w', errors='replace') as f:
+                  f'{ass_number}.txt', mode='w', errors='replace', encoding='utf-8') as f:
             f.writelines(solution_content)
         print('INFO: wrote to concatenated successfully:', student_name)
     return corrected_students
@@ -155,7 +155,7 @@ def create_feedback(file_path: str, ass_number: str, exercise_points):
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points)
     feedback_path = f'{trailing_os_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
-    with open(feedback_path, mode='w', errors='replace') as file:
+    with open(feedback_path, mode='w', errors='replace', encoding='utf-8') as file:
         file.writelines(empty_feedback)
     print('generated file ' + feedback_path)
 
