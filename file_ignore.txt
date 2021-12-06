@@ -7,3 +7,5 @@ bibel.txt
 .*SPAMFALSE.*
 adult.data
 adult.names
+log20170623.csv
+.gitkeep
