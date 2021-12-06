@@ -43,13 +43,13 @@ class Correction:
         # initializing feedback file
         if not os.path.isfile(feedback_file_path):
             # creating an empty file
-            open(feedback_file_path, mode='w').close()
+            open(feedback_file_path, mode='w', encoding='utf-8').close()
         # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
         self.feedbacks = FileDictionary(feedback_file_path)
         if self.feedbacks.get('.ass_number') != assignment_number:
             if get_input(f'Should feedbacks.dict be overridden? [y/n]'):
                 # erasing all content from file
-                open(feedback_file_path, mode='w').close()
+                open(feedback_file_path, mode='w', encoding='utf-8').close()
                 self.feedbacks.insert('.ass_number', assignment_number)
             else:
                 exit(1)

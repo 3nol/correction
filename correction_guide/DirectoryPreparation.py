@@ -53,7 +53,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
     print('\n-------- ' + just_name + ' --------\n')
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
-    with open(feedback_path, mode='r', errors='replace') as f:
+    with open(feedback_path, mode='r', errors='replace', encoding='utf-8') as f:
         feedback = f.readlines()
     exercise_points = get_configured_exercise_points(ass_number)
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
