@@ -1,7 +1,9 @@
+from ast import literal_eval
 from glob import glob
+from directory_tree import display_tree
+
 from Utility import *
 from Paths import corrector
-from directory_tree import display_tree
 import FileDictionary
 
 
@@ -9,7 +11,12 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
 
-    solution_files = find_solution_files(ass_number, tutti_names)
+    if feedbacks.get('_solution_files') is None \
+            or not get_input('Do you want to use previously selected solution files? [y/n]'):
+        solution_files = find_solution_files(ass_number, tutti_names)
+        feedbacks.insert('_solution_files', str(solution_files))
+    else:
+        solution_files = literal_eval(feedbacks.get('_solution_files'))
     corrected_students = []
     for student_name in solution_files:
         solution_content = []
