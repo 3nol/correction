@@ -21,7 +21,7 @@ def get_configured_exercise_points(ass_number: str):
     """Reads the points distribution of a given assignment number from the assignment config file"""
 
     exercise_points = []
-    with open(config_path + 'assignment_config.txt', mode='r', errors='replace') as file:
+    with open(config_path + 'assignment_config.txt', mode='r', errors='replace', encoding='utf-8') as file:
         for line in file.readlines():
             if line.strip().startswith(ass_number):
                 for exercise in line.strip().split(' : ', 1)[1].split(', '):
@@ -144,7 +144,7 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     """Method to edit/ fill in the correction into a pre-generated feedback file.
     This includes the points and a text for a given exercise."""
 
-    with open(file_path, mode='r', errors='replace') as file:
+    with open(file_path, mode='r', errors='replace', encoding='utf-8') as file:
         current_file = file.readlines()
     # preparing point amounts
     new_total = str(float(current_file[1][1:].split('/', 1)[0]) + float(points)).split('.0', 1)[0]
@@ -180,7 +180,7 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
     """To delete the feedback of a task or subtask from a feedback_file. Removing the previous given
     points from the total points and setting the points from the task to 0 """
 
-    with open(file_path, mode='r', errors='replace') as file:
+    with open(file_path, mode='r', errors='replace', encoding='utf-8') as file:
         current_file = file.readlines()
     index = get_index(current_file, pointer)
     next_pointer = increment_pointer(pointer, exercise_points)
