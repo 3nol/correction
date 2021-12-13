@@ -254,8 +254,8 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
         inp = str(input(message + '\n'))
         if input_type == 'boolean' and inp.lower() in ['n', 'y']:
             return inp.lower() == 'y'
-        elif input_type == 'numeric' and re.match(r'\d+(\.5)?', inp):
-            return float(inp)
+        elif input_type == 'numeric' and re.match(r'\d+([.,]5)?', inp):
+            return float(inp.replace(',', '.'))
         elif input_type == 'text':
             if text_wrap:
                 return textwrap.fill(str(inp), 80) if inp != '' else ' '
