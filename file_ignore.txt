@@ -9,3 +9,5 @@ adult.data
 adult.names
 log20170623.csv
 .gitkeep
+index.*
+.*html
