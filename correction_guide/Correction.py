@@ -112,7 +112,6 @@ class Correction:
             for name in self.task_queue.peek_smallest():
                 # check if it actually worked and the correct student is selected
                 just_name = str(name).rsplit(os.path.sep, 1)[1]
-                print('\n-------- ' + just_name + ' @ ' + str(self.get_status()) + ' --------\n')
                 t = self.task_queue.pointer.split('.', 1)[0]
                 # saving the pointer for the next person
                 temp_pointer = self.task_queue.pointer
@@ -126,7 +125,7 @@ class Correction:
                     with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer, self.exercise_points):
-                        get_solution(current_file, temp_pointer, self.exercise_points)
+                        get_solution(current_file, temp_pointer, self.exercise_points, printing=True)
                         points, comment = self.__correct_single_solution(temp_pointer, just_name)
                     else:
                         for line in current_file:
@@ -173,6 +172,7 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
+        print('\n-------- ' + just_name + ' @ ' + str(self.get_status()) + ' --------\n')
         loaded, comment = load_feedback(self.feedbacks, temp_pointer)
         if loaded:
             return comment

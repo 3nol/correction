@@ -51,7 +51,6 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
     feedback is printed"""
 
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
-    print('\n-------- ' + just_name + ' --------\n')
     feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, mode='r', errors='replace', encoding='utf-8') as f:
         feedback = f.readlines()
@@ -82,6 +81,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
             for line in new_solution:
                 print(line)
             solution_status = 1 if get_input('Is the task ' + pointer + ' in the file? [y/n]') else 2
+        print('\n-------- ' + just_name + ' --------\n')
         # handling the solution status: 1 -> new correction, 2 -> insert 0 points in feedback
         points = 0
         comment = 'No solution.'
