@@ -202,7 +202,7 @@ class Correction:
                       mode='r', errors='replace', encoding='utf-8') as f:
                 file = f.readlines()
             for i in range(3, len(file)):
-                points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}]')
+                points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}\.?5?]')
                 if points.findall(file[i]):
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
             total_points = str(total_points).split('.0', 1)[0]
