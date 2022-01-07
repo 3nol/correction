@@ -121,7 +121,7 @@ def get_solution(current_file: list, exercise_pointer: str, exercise_points: lis
 
     solution = []
     if printing:
-        print(exercise_pointer)
+        print(f'''\n┌{len(exercise_pointer) * '─'}┐\n│{exercise_pointer}│\n└{len(exercise_pointer) * '─'}┘''')
     task, subtask = split_pointer(exercise_pointer)
     prev_index = 0 if task == '1' and subtask in ['', 'a'] \
         else get_index(current_file, decrement_pointer(exercise_pointer, exercise_points))
