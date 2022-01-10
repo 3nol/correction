@@ -74,12 +74,12 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
             if new_exercise != old_exercise:
                 print('\n')
                 for line in new_exercise:
-                    print(line)
+                    print(str(line).strip())
                 solution_status = 1
         # if there is no solution i could have been deleted and therefore we ask if the task is still there
         else:
             for line in new_solution:
-                print(line)
+                print(str(line).strip())
             solution_status = 1 if get_input('Is the task ' + pointer + ' in the file? [y/n]') else 2
         print('\n-------- ' + just_name + ' --------\n')
         # handling the solution status: 1 -> new correction, 2 -> insert 0 points in feedback
@@ -90,7 +90,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
             get_solution(feedback, pointer, exercise_points)
             if not get_input('Is the feedback still correct? [y/n]'):
                 # if feedback is not appropriate anymore, a comment is asked for again
-                loaded, comment = load_feedback(feedbacks, pointer)
+                loaded, comment = load_feedback(feedbacks, pointer, new_solution)
                 if loaded:
                     points, comment = comment
                 elif not get_input('Is the solution correct? [y/n]'):
