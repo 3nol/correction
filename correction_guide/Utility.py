@@ -5,6 +5,7 @@ import textwrap
 import requests
 from DB import *
 from Paths import config_path, source_path
+from FileDictionary import FileDictionary
 
 taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'AUFGABE', 'Lösung', 'lösung', 'LÖSUNG',
               'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION', 'Sol', 'sol', 'SOL',
@@ -158,21 +159,27 @@ def insert_in_file(file_path: str, exercise_pointer: str, points: str, text: str
     return new_total
 
 
-def load_feedback(feedbacks, pointer) -> (bool, any):
-    """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id"""
+def load_feedback(feedbacks: FileDictionary, pointer: str, solution_file: list) -> (bool, any):
+    """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id
+    Additionally, with '>s' the entire solution can be printed out."""
 
     while True:
         comment = get_input('Please enter some comments (without newlines).\n'
                             'You can also load a stored feedback using \'>feedback_id\'.', 'text')
         if comment.startswith('>'):
-            if feedbacks.get(pointer + '_' + comment[1:]) is not None:
-                # feedback is loaded and split into 2 components: points and comment
-                print('INFO: feedback was loaded successfully')
-                p, c = feedbacks.get(pointer + '_' + comment[1:]).split(', ', 1)
-                return True, (p, textwrap.fill(c, 80))
-            else:
-                print('INFO: feedback was not found, try again')
+            if comment.strip() == '>s':
+                for line in solution_file:
+                    print(str(line).strip())
                 continue
+            else:
+                if feedbacks.get(pointer + '_' + comment[1:]) is not None:
+                    # feedback is loaded and split into 2 components: points and comment
+                    print('INFO: feedback was loaded successfully')
+                    p, c = feedbacks.get(pointer + '_' + comment[1:]).split(', ', 1)
+                    return True, (p, textwrap.fill(c, 80))
+                else:
+                    print('INFO: feedback was not found, try again')
+                    continue
         return False, comment
 
 

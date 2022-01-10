@@ -124,16 +124,17 @@ class Correction:
                                     f'{self.assignment_number}.txt'
                     with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
+                    current_file.append('\n')
                     if solution_exists(current_file, temp_pointer, self.exercise_points):
                         get_solution(current_file, temp_pointer, self.exercise_points, printing=True)
-                        points, comment = self.__correct_single_solution(temp_pointer, just_name)
+                        points, comment = self.__correct_single_solution(temp_pointer, just_name, current_file)
                     else:
                         for line in current_file:
-                            print(line.strip())
+                            print(str(line).strip())
                         if ''.join(current_file).strip() != '' and \
                                 get_input('Is the task ' + temp_pointer + ' in the file? [y/n]'):
                             # start correction here
-                            points, comment = self.__correct_single_solution(temp_pointer, just_name)
+                            points, comment = self.__correct_single_solution(temp_pointer, just_name, current_file)
                         else:
                             points = 0
                             comment = 'No solution.'
@@ -167,13 +168,13 @@ class Correction:
             # continue search
             feedback_pointer = increment_pointer(feedback_pointer, self.exercise_points)
 
-    def __correct_single_solution(self, temp_pointer: str, just_name: str) -> (str, str):
+    def __correct_single_solution(self, temp_pointer: str, just_name: str, solution_file: list) -> (str, str):
         """Correction of a single student. The student's concatenated content file is opened,
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
         print('\n-------- ' + just_name + ' @ ' + str(self.get_status()) + ' --------\n')
-        loaded, comment = load_feedback(self.feedbacks, temp_pointer)
+        loaded, comment = load_feedback(self.feedbacks, temp_pointer, solution_file)
         if loaded:
             return comment
         task, subtask = split_pointer(temp_pointer)
