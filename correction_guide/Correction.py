@@ -89,7 +89,7 @@ class Correction:
             # else create a new template
             else:
                 create_feedback(student, self.assignment_number, self.exercise_points)
-                print('new feedback templates generated for' + student)
+                print('new feedback templates generated for', student)
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer != '':
             self.start_correction()
