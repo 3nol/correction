@@ -170,6 +170,7 @@ def load_feedback(feedbacks: FileDictionary, pointer: str, solution_file: list) 
             if comment.strip() == '>s':
                 for line in solution_file:
                     print(str(line).strip())
+                print(f'''\n┌{len(pointer) * '─'}┐\n│{pointer}│\n└{len(pointer) * '─'}┘''')
                 continue
             else:
                 if feedbacks.get(pointer + '_' + comment[1:]) is not None:
