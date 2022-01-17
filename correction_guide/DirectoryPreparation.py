@@ -24,7 +24,6 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
             if not is_ignored_file(file):
                 with open(file, mode='r', errors='replace', encoding='utf-8') as f:
                     solution_content.extend(f.readlines())
-                solution_content.append('\n')
         # saving the old file to check for changes
         if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                           f'{ass_number}.txt'):
