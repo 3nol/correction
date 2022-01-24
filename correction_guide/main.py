@@ -1,12 +1,13 @@
 import os
 import sys
+from itertools import dropwhile
 
 from Correction import Correction
 from Paths import source_path
 
 if __name__ == '__main__':
     try:
-        ass_number = str(sys.argv[1]).rsplit('0', 1)[1]
+        ass_number = ''.join(dropwhile(lambda c: c == '0', str(sys.argv[1])))
         if len(sys.argv) > 2 and sys.argv[2] in ['-s', '--solution-only']:
             tutti_names = []
             for student in [f.path for f in os.scandir(source_path) if f.is_dir() and '***REMOVED***' not in f.path]:
