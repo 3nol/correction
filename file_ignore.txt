@@ -11,3 +11,5 @@ log20170623.csv
 .gitkeep
 index.*
 .*html
+.*jpe?g
+.*png
