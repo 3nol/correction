@@ -13,3 +13,4 @@ index.*
 .*html
 .*jpe?g
 .*png
+.*vacation.*
