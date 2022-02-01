@@ -1,3 +1,2 @@
 requests
 mysql-connector-python
-directory_tree
