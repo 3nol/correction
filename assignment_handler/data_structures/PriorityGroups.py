@@ -1,4 +1,5 @@
-from Utility import increment_pointer, get_configured_exercise_points
+from assignment_handler.config import GlobalConstants as GC
+from assignment_handler.utilities.Utility import increment_pointer
 
 
 class PriorityGroups:
@@ -8,7 +9,7 @@ class PriorityGroups:
 
     def __init__(self, ass_number: str):
         self.groups = {}
-        self.exercise_points = get_configured_exercise_points(ass_number)
+        self.exercise_points = GC.get(f'points_{ass_number}')
         self.pointer = ''
         i = 1
         # initializing all empty priority groups
