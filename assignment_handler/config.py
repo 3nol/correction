@@ -2,7 +2,7 @@
 class GlobalConstants:
 
     __conf = {
-        'correcting_person': 'Chuck Norris',
+        'corrector': 'Chuck Norris',
         'source_path': '../assignments',
         'points_': {
             '01': [[3, 2], [3], [2]],

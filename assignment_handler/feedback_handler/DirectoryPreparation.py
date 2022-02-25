@@ -1,10 +1,8 @@
 from ast import literal_eval
 from glob import glob
 
-from Utility import *
-from Paths import corrector
-from Tree import print_tree
-import FileDictionary
+from assignment_handler.utilities.Tree import print_tree
+from assignment_handler.utilities.Utility import *
 
 
 def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDictionary) -> list:
@@ -25,18 +23,18 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
                 with open(file, mode='r', errors='replace', encoding='utf-8') as f:
                     solution_content.extend(f.readlines())
         # saving the old file to check for changes
-        if os.path.exists(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+        if os.path.exists(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                           f'{ass_number}.txt'):
-            with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+            with open(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                       f'{ass_number}.txt', mode='r', errors='replace', encoding='utf-8') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
-            if os.path.exists(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
+            if os.path.exists(f'{trailing_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
                 if "".join(solution_content) != "".join(old_concatenated_solution):
                     compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
                                                            old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
-        with open(f'{trailing_os_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
+        with open(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
                   f'{ass_number}.txt', mode='w', errors='replace', encoding='utf-8') as f:
             f.writelines(solution_content)
         print('INFO: wrote to concatenated successfully:', student_name)
@@ -50,10 +48,10 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
     feedback is printed"""
 
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
-    feedback_path = f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
+    feedback_path = f'{trailing_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, mode='r', errors='replace', encoding='utf-8') as f:
         feedback = f.readlines()
-    exercise_points = get_configured_exercise_points(ass_number)
+    exercise_points = GC.get(f'points_{ass_number}')
     pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
     # loop while there is still a feedback or no more exercises
     while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
@@ -108,8 +106,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         if solution_status > 0:
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
-            insert_in_db(just_name, ass_number, new_total_points)
-            update_db()
+            insert_single_student(just_name, ass_number, new_total_points)
+            update_total_points()
         pointer = increment_pointer(pointer, exercise_points)
 
 
@@ -119,7 +117,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
 
     tutti_solutions = {}
     for name in tutti_names:
-        potential_folders = [f for f in glob(f'{trailing_os_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
+        potential_folders = [f for f in glob(f'{trailing_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
                                              recursive=True) if os.path.isdir(f)]
         solutions_files = []
         if len(potential_folders) > 0:
@@ -135,7 +133,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
             else:
                 i = 0
             for path, _, file_list in os.walk(potential_folders[i]):
-                solutions_files.extend(map(lambda file: trailing_os_sep(path) + file, file_list))
+                solutions_files.extend(map(lambda file: trailing_sep(path) + file, file_list))
         else:
             print_tree(name, exclude=get_excluded_files(), relative_path=True, show_hidden=False)
             print('INFO: no solutions by', str(name).rsplit(os.path.sep, 1)[1])
@@ -145,7 +143,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                                   input_type='text', text_wrap=False)
                 if files.strip() == '':
                     break
-                files = list(map(lambda f: trailing_os_sep(name) + str(f).strip(), files.split(',')))
+                files = list(map(lambda f: trailing_sep(name) + str(f).strip(), files.split(',')))
                 if all(map(os.path.isfile, files)):
                     solutions_files.extend(files)
                     break
@@ -160,7 +158,7 @@ def create_feedback(file_path: str, ass_number: str, exercise_points):
     """Goes through all names in the directory (except ***REMOVED***) and fills in a generated feedback file"""
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points)
-    feedback_path = f'{trailing_os_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
+    feedback_path = f'{trailing_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
     with open(feedback_path, mode='w', errors='replace', encoding='utf-8') as file:
         file.writelines(empty_feedback)
     print('generated file ' + feedback_path)
@@ -170,7 +168,7 @@ def generate_feedback_file(ass_number: str, exercise_points):
     """Does the feedback generation, using the assignment number, the exercise point distribution
     and the name of the corrector"""
 
-    lines = ['Feedback Assignment ' + ass_number + '\n', '[0/10]\n', 'Tutor: ' + corrector + '\n', '\n', '\n']
+    lines = ['Feedback Assignment ' + ass_number + '\n', '[0/10]\n', 'Tutor: ' + GC.get('corrector') + '\n', '\n', '\n']
     task_counter = 1
     for exercise in exercise_points:
         if len(exercise) > 1:
