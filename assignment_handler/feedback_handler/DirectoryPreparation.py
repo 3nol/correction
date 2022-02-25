@@ -1,17 +1,29 @@
+import os
+import re
 from ast import literal_eval
 from glob import glob
 
+from assignment_handler.Config import GlobalConstants as gc
+from assignment_handler.data_structures.ExercisePointer import ExercisePointer
+from assignment_handler.data_structures.FileDictionary import FileDictionary
+from assignment_handler.utilities.DatabaseConnector import insert_single_student, update_total_points
 from assignment_handler.utilities.Tree import print_tree
-from assignment_handler.utilities.Utility import *
+from assignment_handler.utilities.Utility import \
+    trailing_sep, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback, delete_old_feedback
 
 
-def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDictionary) -> list:
+def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDictionary) -> list:
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
 
+    concat_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('concat_folder'))}
+                                c_assignment{ass_number}.txt'''
+    feedback_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('feedback_folder'))}
+                                  assignment{ass_number}.txt'''
+
     if feedbacks.get('_solution_files') is None \
             or not get_input('Do you want to use previously selected solution files? [y/n]'):
-        solution_files = find_solution_files(ass_number, tutti_names)
+        solution_files = find_solution_files(ass_number, student_names)
         feedbacks.insert('_solution_files', str(solution_files))
     else:
         solution_files = literal_eval(feedbacks.get('_solution_files'))
@@ -23,19 +35,16 @@ def extract_solutions(ass_number: str, tutti_names: list, feedbacks: FileDiction
                 with open(file, mode='r', errors='replace', encoding='utf-8') as f:
                     solution_content.extend(f.readlines())
         # saving the old file to check for changes
-        if os.path.exists(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                          f'{ass_number}.txt'):
-            with open(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                      f'{ass_number}.txt', mode='r', errors='replace', encoding='utf-8') as f:
+        if os.path.exists(concat_path(student_name)):
+            with open(concat_path(student_name), mode='r', errors='replace', encoding='utf-8') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
-            if os.path.exists(f'{trailing_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'):
+            if os.path.exists(feedback_path(student_name)):
                 if "".join(solution_content) != "".join(old_concatenated_solution):
                     compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
                                                            old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
-        with open(f'{trailing_sep(student_name)}concatenated{os.path.sep}concatenated_assignment'
-                  f'{ass_number}.txt', mode='w', errors='replace', encoding='utf-8') as f:
+        with open(concat_path(student_name), mode='w', errors='replace', encoding='utf-8') as f:
             f.writelines(solution_content)
         print('INFO: wrote to concatenated successfully:', student_name)
     return corrected_students
@@ -49,13 +58,15 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
 
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
     feedback_path = f'{trailing_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
+    exercise_points = gc.get(f'points_{ass_number}')
+    pointer = ExercisePointer(ass_number)
+
     with open(feedback_path, mode='r', errors='replace', encoding='utf-8') as f:
         feedback = f.readlines()
-    exercise_points = GC.get(f'points_{ass_number}')
-    pointer = '1.' if len(exercise_points[0]) == 1 else '1.a'
+
     # loop while there is still a feedback or no more exercises
-    while int(pointer.split('.', 1)[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
-        task, subtask = split_pointer(pointer)
+    while int(pointer.split()[0]) <= len(exercise_points) and feedback[get_index(feedback, pointer) + 1] != '\n':
+        task, subtask = pointer.split()
         # get the maximum possible points for this exercise, either from the subtask or main task
         possible_points = exercise_points[int(task) - 1][ord(subtask) - 96 - 1] \
             if len(exercise_points[int(task) - 1]) > 1 else \
@@ -63,10 +74,10 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         # solution status indicator: 0 = nothing changed, 1 = changes present, 2 = no solution
         solution_status = 0
         # if there is a solution
-        if solution_exists(new_solution, pointer, exercise_points):
+        if sol_exists(new_solution, pointer, exercise_points):
             new_exercise = get_solution(new_solution, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False) \
-                if solution_exists(old_solution, pointer, exercise_points) else []
+                if sol_exists(old_solution, pointer, exercise_points) else []
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
                 print('\n')
@@ -77,7 +88,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         else:
             for line in new_solution:
                 print(str(line).strip())
-            solution_status = 1 if get_input('Is the task ' + pointer + ' in the file? [y/n]') else 2
+            solution_status = 1 if get_input('Is the task ' + str(pointer) + ' in the file? [y/n]') else 2
         print('\n-------- ' + just_name + ' --------\n')
         # handling the solution status: 1 -> new correction, 2 -> insert 0 points in feedback
         points = 0
@@ -108,15 +119,15 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
             insert_single_student(just_name, ass_number, new_total_points)
             update_total_points()
-        pointer = increment_pointer(pointer, exercise_points)
+        pointer.increment()
 
 
-def find_solution_files(ass_number: str, tutti_names: list) -> dict:
+def find_solution_files(ass_number: str, student_names: list) -> dict:
     """Super smart method for detecting solutions in almost any folder structure. If multiple options are possible,
     the tutor is asked to decide which one to pick"""
 
-    tutti_solutions = {}
-    for name in tutti_names:
+    solutions = {}
+    for name in student_names:
         potential_folders = [f for f in glob(f'{trailing_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
                                              recursive=True) if os.path.isdir(f)]
         solutions_files = []
@@ -135,7 +146,7 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
             for path, _, file_list in os.walk(potential_folders[i]):
                 solutions_files.extend(map(lambda file: trailing_sep(path) + file, file_list))
         else:
-            print_tree(name, exclude=get_excluded_files(), relative_path=True, show_hidden=False)
+            print_tree(name, exclude=gc.get('excluded_filetypes'), relative_path=True, show_hidden=False)
             print('INFO: no solutions by', str(name).rsplit(os.path.sep, 1)[1])
             while True:
                 files = get_input('Enter solution file paths (inside the student\'s directory), separated by comma.\n'
@@ -150,8 +161,8 @@ def find_solution_files(ass_number: str, tutti_names: list) -> dict:
                 else:
                     print('INFO: at least one file does not exist, try again')
             print('\n')
-        tutti_solutions[name] = solutions_files
-    return tutti_solutions
+        solutions[name] = solutions_files
+    return solutions
 
 
 def create_feedback(file_path: str, ass_number: str, exercise_points):
@@ -168,7 +179,7 @@ def generate_feedback_file(ass_number: str, exercise_points):
     """Does the feedback generation, using the assignment number, the exercise point distribution
     and the name of the corrector"""
 
-    lines = ['Feedback Assignment ' + ass_number + '\n', '[0/10]\n', 'Tutor: ' + GC.get('corrector') + '\n', '\n', '\n']
+    lines = ['Feedback Assignment ' + ass_number + '\n', '[0/10]\n', 'Tutor: ' + gc.get('corrector') + '\n', '\n', '\n']
     task_counter = 1
     for exercise in exercise_points:
         if len(exercise) > 1:
@@ -187,21 +198,10 @@ def generate_feedback_file(ass_number: str, exercise_points):
 
 
 def is_ignored_file(file_path: str) -> bool:
-    """Checks whether the file is on the list of ignored files (file_ignore.txt)"""
+    """Checks whether the file is on the list of ignored files, see Config.py"""
 
     file_name = file_path.split(os.path.sep)[-1]
-    with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}file_ignore.txt',
-              mode='r', errors='replace') as f:
-        reg_ignore = [x.strip() for x in f.readlines()]
-    for ig in reg_ignore:
-        if re.match(ig, file_name):
+    for ignore in gc.get('excluded_filetypes'):
+        if re.match(ignore, file_name):
             return True
     return False
-
-
-def get_excluded_files() -> list:
-    """returns a list of regexes matching the files which should be excluded (file_ignore.txt)"""
-
-    with open(f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}file_ignore.txt',
-              mode='r', errors='replace') as f:
-        return [x.strip() for x in f.readlines()]
