@@ -98,7 +98,7 @@ class Correction:
                 create_feedback(student, self.assignment_number, self.exercise_points)
                 print('new feedback templates generated for', student)
                 self.task_queue.insert_at_pointer(student, start_pointer)
-        if self.task_queue.pointer != '':
+        if self.task_queue.pointer is not None:
             self.start_correction()
         else:
             print("There is no one left to correct!")
@@ -123,13 +123,13 @@ class Correction:
                 # saving the pointer for the next person
                 temp_pointer = self.task_queue.pointer.clone()
                 # go through all subtasks 1.X
-                while t == temp_pointer.split('.', 1)[0]:
-                    path = f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))}
-                                assignment{self.assignment_number}.txt'''
+                while t == temp_pointer.split()[0]:
+                    path = f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
+                                }assignment{self.assignment_number}.txt'''
                     # checking if there is a solution -> later checking if there is
                     # a difference to the empty solution sheet
-                    solution_path = f'''{trailing_sep(name) + trailing_sep(gc.get('concat_folder'))}
-                                        c_assignment_{self.assignment_number}'''
+                    solution_path = f'''{trailing_sep(name) + trailing_sep(gc.get('concat_folder'))
+                                         }c_assignment{self.assignment_number}.txt'''
                     with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
                     if sol_exists(current_file, temp_pointer, self.exercise_points):
@@ -161,8 +161,8 @@ class Correction:
         task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
 
         feedback_pointer = ExercisePointer(self.assignment_number)
-        with open(f'''{trailing_sep(student_name) + trailing_sep(gc.get('feedback_folder'))}
-                        assignment{self.assignment_number}.txt''',
+        with open(f'''{trailing_sep(student_name) + trailing_sep(gc.get('feedback_folder'))
+                       }assignment{self.assignment_number}.txt''',
                   mode='r', errors='replace', encoding='utf-8') as f:
             feedback = f.readlines()
         while True:
@@ -207,8 +207,8 @@ class Correction:
     def __recalculate_points(self):
         for name in self.student_names:
             total_points = 0
-            with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))}
-                            assignment{self.assignment_number}.txt''',
+            with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
+                           }assignment{self.assignment_number}.txt''',
                       mode='r', errors='replace', encoding='utf-8') as f:
                 file = f.readlines()
             for i in range(3, len(file)):
@@ -217,8 +217,8 @@ class Correction:
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
             total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
-            with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))}
-                            assignment{self.assignment_number}.txt''',
+            with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
+                           }assignment{self.assignment_number}.txt''',
                       mode='w', errors='replace', encoding='utf-8') as f:
                 f.writelines(file)
             print('INFO: wrote feedback points successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
@@ -228,8 +228,8 @@ class Correction:
 
         if is_db_available():
             for name in self.student_names:
-                with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))}
-                            assignment{self.assignment_number}.txt''',
+                with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
+                               }assignment{self.assignment_number}.txt''',
                           mode='r', errors='replace', encoding='utf-8') as f:
                     insert_single_student(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                  str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])

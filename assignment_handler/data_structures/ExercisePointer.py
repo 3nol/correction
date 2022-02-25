@@ -2,11 +2,14 @@ from assignment_handler.Config import GlobalConstants as gc
 
 
 class ExercisePointer:
-    def __init__(self, ass_number: str, maintask: str = '', subtask: str = ''):
+    def __init__(self, ass_number: str, maintask: str = None, subtask: str = None):
         self.ass_number = ass_number
         self.exercise_points = gc.get(f'points_{ass_number}')
-        self.maintask = '1' if maintask == '' else maintask
-        self.subtask = 'a' if subtask == '' and len(self.exercise_points[0]) > 1 else subtask
+        self.maintask = '1' if maintask is None else maintask
+        if len(self.exercise_points[0]) > 1:
+            self.subtask = 'a' if subtask is None else subtask
+        else:
+            self.subtask = '' if subtask is None else subtask
 
     def __str__(self):
         """String representation of an exercise pointer, tasks separated by point"""
@@ -32,8 +35,8 @@ class ExercisePointer:
                     self.subtask = 'a' if len(self.exercise_points[int(self.maintask) - 1]) > 1 else ''
             else:
                 maintask = str(int(self.maintask) + 1)
-                if int(self.maintask) <= len(self.exercise_points):
-                    subtask = 'a' if len(self.exercise_points[int(self.maintask) - 1]) > 1 else ''
+                if int(maintask) <= len(self.exercise_points):
+                    subtask = 'a' if len(self.exercise_points[int(maintask) - 1]) > 1 else ''
         # increment just subtask
         else:
             if inplace:
@@ -54,8 +57,8 @@ class ExercisePointer:
                     if len(self.exercise_points[int(self.maintask) - 1]) != 1 else ''
             else:
                 maintask = str(int(self.maintask) - 1)
-                subtask = chr(len(self.exercise_points[int(self.maintask) - 1]) + 96) \
-                    if len(self.exercise_points[int(self.maintask) - 1]) != 1 else ''
+                subtask = chr(len(self.exercise_points[int(maintask) - 1]) + 96) \
+                    if len(self.exercise_points[int(maintask) - 1]) != 1 else ''
         # decrement just subtask
         elif self.subtask != 'a' and self.subtask != '':
             if inplace:
