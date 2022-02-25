@@ -2,6 +2,15 @@ import os
 
 
 class GlobalConstants:
+    """
+    Stores all constant configurations of this program, includes:
+        - the correcting person, the source directory and point distribution
+        - database connection credentials
+        - folder names and excluded ones
+        - main- and subtask frequent prefixes for detection
+    """
+
+    # dictionary which stores everything
     __conf = {
         'corrector': '***REMOVED*** ***REMOVED***',
         'source_path': f'{os.getcwd().rsplit(os.path.sep, 2)[0]}{os.path.sep}students{os.path.sep}',
@@ -49,6 +58,8 @@ class GlobalConstants:
 
     @staticmethod
     def get(key: str) -> any:
+        """Static getter method which retrieves the constants,
+        has an in-built shortcut for getting the points per assignments"""
         try:
             if key.startswith('points_'):
                 return GlobalConstants.__conf['points_'][key.split('points_', 1)[1].zfill(2)]
