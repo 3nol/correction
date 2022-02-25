@@ -46,7 +46,7 @@ class Correction:
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
         # storing feedbacks that were given
-        feedback_file_path: str = trailing_sep(file_path) + 'feedbacks.dict'
+        feedback_file_path: str = trailing_sep(gc.get('feedback_filepath')) + f'{self.assignment_number}_feedbacks.dict'
         # initializing feedback file
         if not os.path.isfile(feedback_file_path):
             # creating an empty file
