@@ -1,5 +1,5 @@
-from assignment_handler.config import GlobalConstants as GC
-from assignment_handler.utilities.Utility import increment_pointer
+from assignment_handler.Config import GlobalConstants as gc
+from assignment_handler.data_structures.ExercisePointer import ExercisePointer
 
 
 class PriorityGroups:
@@ -9,8 +9,9 @@ class PriorityGroups:
 
     def __init__(self, ass_number: str):
         self.groups = {}
-        self.exercise_points = GC.get(f'points_{ass_number}')
-        self.pointer = ''
+        self.ass_number = ass_number
+        self.exercise_points = gc.get(f'points_{ass_number}')
+        self.pointer: ExercisePointer = None
         i = 1
         # initializing all empty priority groups
         for main_task in self.exercise_points:
@@ -23,17 +24,17 @@ class PriorityGroups:
                     j = chr(ord(j) + 1)
             i += 1
 
-    def insert_at_pointer(self, student_name: str, exercise_pointer: str):
+    def insert_at_pointer(self, student_name: str, exercise_pointer: ExercisePointer):
         """Insertion method that puts an object (student_name) in a certain group"""
 
         # self.pointer is set to the lowest possible priority
-        if self.pointer > exercise_pointer or self.pointer == '':
-            self.pointer = exercise_pointer
-        self.groups[exercise_pointer].append(student_name)
+        if self.pointer is None or self.pointer.split()[0] > exercise_pointer.split()[0]:
+            self.pointer = exercise_pointer.clone()
+        self.groups[str(exercise_pointer)].append(student_name)
 
     def peek_smallest(self) -> list:
         # retrieves the current lowest priority group
-        return self.groups[self.pointer]
+        return self.groups[str(self.pointer)]
 
     def move_up_smallest(self):
         """Transition between groups. This method elevates all entries with the lowest priority by one group,
@@ -41,14 +42,14 @@ class PriorityGroups:
 
         values = self.peek_smallest()
         # clearing the group
-        self.groups[self.pointer] = []
+        self.groups[str(self.pointer)] = []
         # getting the pointer of the next main task
-        point = self.pointer
-        while point.split('.', 1)[0] == self.pointer.split('.', 1)[0]:
-            point = increment_pointer(point, self.exercise_points)
-        if int(point.split('.')[0]) <= len(self.exercise_points):
+        run_pointer = self.pointer.clone()
+        while run_pointer.split()[0] == self.pointer.split()[0]:
+            run_pointer.increment()
+        if int(run_pointer.split()[0]) <= len(self.exercise_points):
             # moving lower values into next higher group
-            self.groups[point].extend(values)
+            self.groups[str(run_pointer)].extend(values)
         # incrementing the pointer to the next not empty task
-        while int(self.pointer.split('.')[0]) <= len(self.exercise_points) and not self.groups[self.pointer]:
-            self.pointer = increment_pointer(self.pointer, self.exercise_points)
+        while int(self.pointer.split()[0]) <= len(self.exercise_points) and not self.groups[str(self.pointer)]:
+            self.pointer.increment()
