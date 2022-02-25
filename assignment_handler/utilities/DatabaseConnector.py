@@ -4,14 +4,14 @@ import mysql.connector
 import requests
 
 from Utility import trailing_sep, get_input
-from assignment_handler.config import GlobalConstants as GC
+from assignment_handler.Config import GlobalConstants as gc
 
 
 def is_db_available() -> bool:
     """Helper method to check for the database connection"""
 
     try:
-        requests.get('https://port.halloibims.com', timeout=5)
+        requests.get(f'''https://{gc.get('db')['host']}''', timeout=5)
         return True
     except (requests.ConnectionError, requests.Timeout):
         print('ERROR: not connected to the internet, correction starts in offline mode!')
@@ -26,11 +26,11 @@ def sql_query(query: str, autocommit: bool = True):
     try:
         # connection to Jannes database <3
         con = mysql.connector.connect(
-            user=GC.get('db')['user'],
-            password=GC.get('db')['password'],
-            host=GC.get('db')['host'],
-            port=GC.get('db')['port'],
-            database=GC.get('db')['database'])
+            user=gc.get('db')['user'],
+            password=gc.get('db')['password'],
+            host=gc.get('db')['host'],
+            port=gc.get('db')['port'],
+            database=gc.get('db')['database'])
         cur = con.cursor()
         cur.execute(query)
         result = list(cur.fetchall())
@@ -48,16 +48,16 @@ def insert_single_student(student_name: str, ass_number: str, total_points: str)
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
 
-def write_students_to_db(ass_number: str, tutti_names=None):
+def write_students_to_db(ass_number: str, student_names=None):
     """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
 
-    if tutti_names is None:
-        tutti_names = [f.path for f in os.scandir(GC.get('source_path')) if f.is_dir()]
+    if student_names is None:
+        student_names = [f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()]
 
-    if get_input('are you sure? [y/n]'):
+    if get_input('Are you sure? [y/n]'):
         print('inserting points for assignment', ass_number + ':')
-        for name in tutti_names:
-            with open(f'{trailing_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
+        for name in student_names:
+            with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))}assignment{ass_number}.txt''',
                       mode='r', errors='replace', encoding='utf-8') as f:
                 total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
             insert_single_student(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
