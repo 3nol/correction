@@ -1,11 +1,8 @@
-import ast
-import os
 import re
 import textwrap
-import requests
-from DB import *
-from Paths import config_path, source_path
-from FileDictionary import FileDictionary
+
+from assignment_handler.data_structures.FileDictionary import FileDictionary
+from assignment_handler.utilities.DatabaseConnector import *
 
 taskString = ['Task', 'task', 'TASK', 'Aufgabe', 'aufgabe', 'AUFGABE', 'Lösung', 'lösung', 'LÖSUNG',
               'Loesung', 'loesung', 'LOESUNG', 'Solution', 'solution', 'SOLUTION', 'Sol', 'sol', 'SOL',
@@ -16,18 +13,6 @@ subtaskString = ['SubTask', 'subtask', 'SUBTASK', 'Aufgabe', 'aufgabe', 'AUFGABE
 
 
 # -- POINTER & INDEX ARITHMETIC --
-
-
-def get_configured_exercise_points(ass_number: str):
-    """Reads the points distribution of a given assignment number from the assignment config file"""
-
-    exercise_points = []
-    with open(config_path + 'assignment_config.txt', mode='r', errors='replace', encoding='utf-8') as file:
-        for line in file.readlines():
-            if line.strip().startswith(ass_number):
-                for exercise in line.strip().split(' : ', 1)[1].split(', '):
-                    exercise_points.append(ast.literal_eval(exercise))
-    return exercise_points
 
 
 def split_pointer(pointer: str):
@@ -209,34 +194,10 @@ def delete_old_feedback(file_path: str, pointer: str, exercise_points: list):
         file.writelines(current_file)
 
 
-# -- DATABASE STUFF --
-
-
-def insert_total_in_db(ass_number: str, tutti_names: list = [f.path for f in os.scandir(source_path) if f.is_dir()]):
-    """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
-
-    if get_input('Are you sure? [y/n]'):
-        print('inserting points for assignment', ass_number + ':')
-        for name in tutti_names:
-            with open(f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{ass_number}.txt',
-                      mode='r', errors='replace', encoding='utf-8') as f:
-                total = str(float(f.readlines()[1][1:].split('/', 1)[0]))
-            insert_in_db(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
-            print('-', str(name).rsplit(os.path.sep, 1)[1], total)
-        update_db()
-    else:
-        print('probably the better choice')
-
-
-def insert_in_db(student_name: str, ass_number: str, total_points: str):
-    # inserts the points per assignment for a certain student into the database
-    sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
-
-
 # -- HELPER METHODS --
 
 
-def trailing_os_sep(path: str, should_have_sep: bool = True):
+def trailing_sep(path: str, should_have_sep: bool = True):
     """Small helper function that ensures that there is or is not a tailing path separator"""
 
     if path[-1] != os.sep and should_have_sep:
@@ -272,12 +233,4 @@ def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
             print('Invalid input, try again.')
 
 
-def is_db_available() -> bool:
-    """Helper method to check for the database connection"""
 
-    try:
-        requests.get('https://port.halloibims.com', timeout=5)
-        return True
-    except (requests.ConnectionError, requests.Timeout):
-        print('ERROR: not connected to the internet, correction starts in offline mode!')
-        return False

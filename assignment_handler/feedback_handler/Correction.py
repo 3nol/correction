@@ -1,7 +1,6 @@
-from Utility import *
-from PriorityGroups import PriorityGroups
 from DirectoryPreparation import extract_solutions, create_feedback
-from FileDictionary import FileDictionary
+from assignment_handler.data_structures.PriorityGroups import PriorityGroups
+from assignment_handler.utilities.Utility import *
 
 
 def init_tutti_names(names: list, filepath=False):
@@ -10,8 +9,8 @@ def init_tutti_names(names: list, filepath=False):
 
     if filepath:
         with open(names[0], mode='r', errors='replace', encoding='utf-8') as f:
-            names = list(filter(lambda x: x not in ['johannes.fuchs', 'clara.biedermann', 'leon.wenzler'],
-                            map(lambda x: str(x).strip(), f.readlines())))
+            names = list(filter(lambda x: x not in GC.get('excluded_names'),
+                                map(lambda x: str(x).strip(), f.readlines())))
     for name in names:
         sql_query(f"INSERT INTO points_table (student_name) VALUES ('{name}')")
         print('inserted tutti:', name)
@@ -24,7 +23,7 @@ class Correction:
     - Correction-process: sequential go-through of exercises of all tuttis
     A progress save file is written to the filepath/correct_tmp.txt"""
 
-    def __init__(self, file_path: str, assignment_number: str, tutti_names: list = []):
+    def __init__(self, file_path: str, assignment_number: str, tutti_names=None):
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.file_path: str = file_path
@@ -32,14 +31,14 @@ class Correction:
         # PriorityGroups objects to manage remaining students (to be corrected)
         self.task_queue: PriorityGroups = PriorityGroups(assignment_number)
         # getting points distribution from config file 'assignment_config.txt'
-        self.exercise_points: list = get_configured_exercise_points(self.assignment_number)
+        self.exercise_points: list = GC.get(f'points_{self.assignment_number}')
         # flat-mapping all names of tutorial attendants
-        self.tutti_names: list = [f.path for f in os.scandir(self.file_path) if f.is_dir()
-                                  and 'johannes.fuchs' not in f.path] if tutti_names == [] else tutti_names
+        self.tutti_names: list = tutti_names if tutti_names is not None \
+            else [f.path for f in os.scandir(self.file_path) if f.is_dir()]
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
         # storing feedbacks that were given
-        feedback_file_path: str = trailing_os_sep(file_path) + 'feedbacks.dict'
+        feedback_file_path: str = trailing_sep(file_path) + 'feedbacks.dict'
         # initializing feedback file
         if not os.path.isfile(feedback_file_path):
             # creating an empty file
@@ -117,11 +116,12 @@ class Correction:
                 temp_pointer = self.task_queue.pointer
                 # go through all subtasks 1.X
                 while t == temp_pointer.split('.', 1)[0]:
-                    path = f'{trailing_os_sep(name, True)}feedback{os.path.sep}assignment{self.assignment_number}.txt'
+                    path = f'''{trailing_sep(name) + trailing_sep(GC.get('feedback_folder'))}
+                                assignment{self.assignment_number}.txt'''
                     # checking if there is a solution -> later checking if there is
                     # a difference to the empty solution sheet
-                    solution_path = f'{trailing_os_sep(name, True)}concatenated{os.path.sep}concatenated_assignment' \
-                                    f'{self.assignment_number}.txt'
+                    solution_path = f'''{trailing_sep(name) + trailing_sep(GC.get('concat_folder'))}
+                                        c_assignment_{self.assignment_number}'''
                     with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
                     if solution_exists(current_file, temp_pointer, self.exercise_points):
@@ -140,8 +140,8 @@ class Correction:
                     # write task correction to feedback file and to database
                     new_total_points = insert_in_file(path, temp_pointer, str(points), comment)
                     if is_db_available():
-                        insert_in_db(just_name, self.assignment_number, new_total_points)
-                        update_db()
+                        insert_single_student(just_name, self.assignment_number, new_total_points)
+                        update_total_points()
                     # increase corrected tasks
                     self.corrected_task_amount += 1
                     # count to next task and save
@@ -153,7 +153,8 @@ class Correction:
         task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
 
         feedback_pointer = '1.' if len(self.exercise_points[0]) == 1 else '1.a'
-        with open(f'{trailing_os_sep(student_name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+        with open(f'''{trailing_sep(student_name) + trailing_sep(GC.get('feedback_folder'))}
+                        assignment{self.assignment_number}.txt''',
                   mode='r', errors='replace', encoding='utf-8') as f:
             feedback = f.readlines()
         while True:
@@ -198,7 +199,8 @@ class Correction:
     def __recalculate_points(self):
         for name in self.tutti_names:
             total_points = 0
-            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+            with open(f'''{trailing_sep(name) + trailing_sep(GC.get('feedback_folder'))}
+                            assignment{self.assignment_number}.txt''',
                       mode='r', errors='replace', encoding='utf-8') as f:
                 file = f.readlines()
             for i in range(3, len(file)):
@@ -207,7 +209,8 @@ class Correction:
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
             total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
-            with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+            with open(f'''{trailing_sep(name) + trailing_sep(GC.get('feedback_folder'))}
+                            assignment{self.assignment_number}.txt''',
                       mode='w', errors='replace', encoding='utf-8') as f:
                 f.writelines(file)
             print('INFO: wrote feedback points successfully:', str(name).rsplit(os.path.sep, 1)[1], total_points)
@@ -217,11 +220,12 @@ class Correction:
 
         if is_db_available():
             for name in self.tutti_names:
-                with open(f'{trailing_os_sep(name)}feedback{os.path.sep}assignment{self.assignment_number}.txt',
+                with open(f'''{trailing_sep(name) + trailing_sep(GC.get('feedback_folder'))}
+                            assignment{self.assignment_number}.txt''',
                           mode='r', errors='replace', encoding='utf-8') as f:
-                    insert_in_db(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
+                    insert_single_student(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                  str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
-            update_db()
+            update_total_points()
             return True
         else:
             print('ERROR: you have to be online to sync all feedbacks!')
