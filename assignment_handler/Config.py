@@ -66,4 +66,4 @@ class GlobalConstants:
             return GlobalConstants.__conf[key]
         except KeyError:
             print(f'GlobalConstant not found: {key}')
-        return None
+            exit(1)
