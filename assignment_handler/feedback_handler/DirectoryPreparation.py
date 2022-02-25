@@ -16,10 +16,8 @@ def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDicti
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
 
-    concat_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('concat_folder'))}
-                                c_assignment{ass_number}.txt'''
-    feedback_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('feedback_folder'))}
-                                  assignment{ass_number}.txt'''
+    c_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('concat_folder'))}c_assignment{ass_number}.txt'''
+    f_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('feedback_folder'))}assignment{ass_number}.txt'''
 
     if feedbacks.get('_solution_files') is None \
             or not get_input('Do you want to use previously selected solution files? [y/n]'):
@@ -35,16 +33,16 @@ def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDicti
                 with open(file, mode='r', errors='replace', encoding='utf-8') as f:
                     solution_content.extend(f.readlines())
         # saving the old file to check for changes
-        if os.path.exists(concat_path(student_name)):
-            with open(concat_path(student_name), mode='r', errors='replace', encoding='utf-8') as f:
+        if os.path.exists(c_path(student_name)):
+            with open(c_path(student_name), mode='r', errors='replace', encoding='utf-8') as f:
                 old_concatenated_solution = f.readlines()
             # if there is no difference between the old solution and the new one
-            if os.path.exists(feedback_path(student_name)):
+            if os.path.exists(f_path(student_name)):
                 if "".join(solution_content) != "".join(old_concatenated_solution):
                     compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
                                                            old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
-        with open(concat_path(student_name), mode='w', errors='replace', encoding='utf-8') as f:
+        with open(c_path(student_name), mode='w', errors='replace', encoding='utf-8') as f:
             f.writelines(solution_content)
         print('INFO: wrote to concatenated successfully:', student_name)
     return corrected_students
