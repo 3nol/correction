@@ -1,11 +1,11 @@
 import os
 import re
 
-from DirectoryPreparation import extract_solutions, create_feedback
 from assignment_handler.Config import GlobalConstants as gc
 from assignment_handler.data_structures.ExercisePointer import ExercisePointer
 from assignment_handler.data_structures.FileDictionary import FileDictionary
 from assignment_handler.data_structures.PriorityGroups import PriorityGroups
+from assignment_handler.feedback_handler.DirectoryPreparation import extract_solutions, create_feedback
 from assignment_handler.utilities.DatabaseConnector import \
     is_db_available, sql_query, insert_single_student, update_total_points
 from assignment_handler.utilities.Utility import \

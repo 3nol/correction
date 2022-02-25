@@ -3,8 +3,8 @@ import os
 import mysql.connector
 import requests
 
-from Utility import trailing_sep, get_input
 from assignment_handler.Config import GlobalConstants as gc
+from assignment_handler.utilities.Utility import trailing_sep, get_input
 
 
 def is_db_available() -> bool:
