@@ -12,17 +12,33 @@ from assignment_handler.utilities.Utility import \
     trailing_sep, count_sublists, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback
 
 
-def initialize_names(names: list, filepath=False):
+def init_names(names: list, filepath=None) -> None:
     """Takes in a list parameter, either a list with names for which each entry is pushed to the database.
-    If filepath=True and the list holds one entry, its content is used as a filepath to retrieves the names there"""
+    If filepath is given and the list holds one entry, its content is used as a filepath to retrieves the names there"""
 
-    if filepath:
-        with open(names[0], mode='r', errors='replace', encoding='utf-8') as f:
-            names = list(filter(lambda x: x not in gc.get('excluded_names'),
-                                map(lambda x: str(x).strip(), f.readlines())))
-    for name in names:
+    if filepath is not None:
+        with open(filepath, mode='r', errors='replace', encoding='utf-8') as f:
+            names.extend([str(name).strip() for name in f.readlines()])
+    # inserting only non-excluded names into database
+    for name in filter(lambda x: x not in gc.get('excluded_names'), names):
         sql_query(f"INSERT INTO points_table (student_name) VALUES ('{name}')")
         print('inserted student:', name)
+
+
+def init_folders() -> None:
+    """Initializes both the concatenated and feedback folder for each folder whose name is present in the database"""
+
+    dbnames = list(map(lambda x: x[0], sql_query(f"SELECT student_name FROM points_table")))
+    source_path, dirnames, _ = list(os.walk(gc.get('source_path')))[0]
+    for name in dirnames:
+        c_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('concat_folder')
+        f_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('feedback_folder')
+        if name in dbnames and not os.path.exists(c_path) and not os.path.exists(f_path):
+            os.mkdir(c_path)
+            os.mkdir(f_path)
+            print(f'INFO: generated folders for {name}')
+        else:
+            print(f'ERROR: folders could not be generated for {name}')
 
 
 class Correction:
