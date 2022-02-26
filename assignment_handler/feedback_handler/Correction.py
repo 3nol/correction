@@ -9,7 +9,7 @@ from assignment_handler.feedback_handler.DirectoryPreparation import extract_sol
 from assignment_handler.utilities.DatabaseConnector import \
     is_db_available, sql_query, insert_single_student, update_total_points
 from assignment_handler.utilities.Utility import \
-    trailing_sep, count_sublists, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback
+    trailing_sep, sum_sublist_lengths, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback
 
 
 def init_names(names: list, filepath=None) -> None:
@@ -42,12 +42,14 @@ def init_folders() -> None:
 
 
 class Correction:
-    """Controls the entire correction process. Keeps track of who was already corrected
+    """
+    Controls the entire correction process. Keeps track of who was already corrected
     and which exercise the corrector it at.
     - Init-process: generation of template feedback files for all students
-    - Correction-process: sequential go-through of exercises of all students"""
+    - Correction-process: sequential go-through of exercises of all students
+    """
 
-    def __init__(self, file_path: str, assignment_number: str, student_names=None):
+    def __init__(self, file_path: str, assignment_number: str, student_names=None) -> None:
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.file_path: str = file_path
@@ -79,14 +81,15 @@ class Correction:
 
     def get_status(self) -> str:
         # calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage
-        fraction_corrected = self.corrected_task_amount / (count_sublists(self.exercise_points) * len(self.student_names))
+        fraction_corrected = self.corrected_task_amount / \
+                             (sum_sublist_lengths(self.exercise_points) * len(self.student_names))
         return f'''{str(fraction_corrected)[2:4].ljust(2, '0')}.{str(fraction_corrected)[4:6].ljust(2, '0')}%'''
 
-    def get_just_names(self) -> list:
+    def get_just_names(self) -> list[str]:
         # splits the student's name from the file path and returns only it
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.student_names))
 
-    def setup(self):
+    def setup(self) -> None:
         """Starts the correction process by checking against the generated tmp save file,
         if it is empty, new feedbacks are generated for that assignment number,
         otherwise the current progress is read from the save and restored"""
@@ -104,11 +107,11 @@ class Correction:
                 if corrected_pointer != -1:
                     self.task_queue.insert_at_pointer(student, corrected_pointer)
                     c_task, c_subtask = corrected_pointer.split()
-                    self.corrected_task_amount += count_sublists(self.exercise_points[:(int(c_task) - 1)])
+                    self.corrected_task_amount += sum_sublist_lengths(self.exercise_points[:(int(c_task) - 1)])
                     if c_subtask != '':
                         self.corrected_task_amount += ord(c_subtask) - 97
                 else:
-                    self.corrected_task_amount += count_sublists(self.exercise_points)
+                    self.corrected_task_amount += sum_sublist_lengths(self.exercise_points)
             # else create a new template
             else:
                 create_feedback(student, self.assignment_number, self.exercise_points)
@@ -124,7 +127,7 @@ class Correction:
         if self.sync_all_feedbacks():
             print('--- DATABASE UPDATE DONE ---')
 
-    def start_correction(self):
+    def start_correction(self) -> None:
         """Does the sequential correction process by cycling through each task (and its subtasks)
         for each student. This means, first all ex. 01 are corrected, then all ex. 02, ...
         During that, the save file is continually updated to keep track"""
@@ -148,7 +151,7 @@ class Correction:
                                          }c_assignment{self.assignment_number}.txt'''
                     with open(solution_path, mode='r', errors='replace', encoding='utf-8') as f:
                         current_file = f.readlines()
-                    if sol_exists(current_file, temp_pointer, self.exercise_points):
+                    if sol_exists(current_file, temp_pointer):
                         get_solution(current_file, temp_pointer, self.exercise_points, printing=True)
                         points, comment = self.__correct_single_solution(temp_pointer, just_name, current_file)
                     else:
@@ -172,7 +175,7 @@ class Correction:
                     temp_pointer.increment()
             self.task_queue.move_up_smallest()
 
-    def __get_exercise_pointer_from_feedback(self, student_name: str):
+    def __get_exercise_pointer_from_feedback(self, student_name: str) -> ExercisePointer:
         """Detects how far feedback has been giving by analyzing the feedback file and returning a corresponding
         task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
 
@@ -192,7 +195,8 @@ class Correction:
             # continue search
             feedback_pointer.increment()
 
-    def __correct_single_solution(self, temp_pointer: ExercisePointer, just_name: str, solution_file: list) -> (str, str):
+    def __correct_single_solution(self, temp_pointer: ExercisePointer, just_name: str,
+                                  solution_file: list) -> tuple[float, str]:
         """Correction of a single student. The student's concatenated content file is opened,
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
@@ -220,17 +224,24 @@ class Correction:
                               prefix=str(temp_pointer) + '_')
         return points, comment
 
-    def __recalculate_points(self):
+    def __recalculate_points(self) -> None:
+        """Goes again through all generated feedback files, and sums up all given points for total points.
+        Has the advantage of being able to correct points mid-correction and the script picks it up in the
+        end and updates the feedback file."""
+
         for name in self.student_names:
             total_points = 0
             with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
                            }assignment{self.assignment_number}.txt''',
                       mode='r', errors='replace', encoding='utf-8') as f:
                 file = f.readlines()
+            # go through every points specification, except for the total
             for i in range(3, len(file)):
                 points = re.compile(r'\[\d{1,2}\.?5?/\d{1,2}\.?5?]')
                 if points.findall(file[i]):
+                    # add them together
                     total_points += float(str(points.findall(file[i])[0]).split('/', 1)[0][1:])
+            # format it nicely
             total_points = str(total_points).split('.0', 1)[0]
             file[1] = f'[{total_points}/10]\n'
             with open(f'''{trailing_sep(name) + trailing_sep(gc.get('feedback_folder'))
@@ -248,7 +259,7 @@ class Correction:
                                }assignment{self.assignment_number}.txt''',
                           mode='r', errors='replace', encoding='utf-8') as f:
                     insert_single_student(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
-                                 str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
+                                          str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
             update_total_points()
             return True
         else:

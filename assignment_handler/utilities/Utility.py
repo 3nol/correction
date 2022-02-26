@@ -1,6 +1,7 @@
 import os
 import re
 import textwrap
+from typing import Any
 
 from assignment_handler.Config import GlobalConstants as gc
 from assignment_handler.data_structures.ExercisePointer import ExercisePointer
@@ -9,7 +10,7 @@ from assignment_handler.data_structures.FileDictionary import FileDictionary
 
 # -- INDEX MAGIC --
 
-def get_index(current_file, exercise_pointer: ExercisePointer, start_index: int = 0):
+def get_index(current_file, exercise_pointer: ExercisePointer, start_index: int = 0) -> int:
     """Super magic method to get the start index of an exercise in the feedback or solution file"""
 
     # defining match encasing, such as 1.)
@@ -52,7 +53,8 @@ def get_index(current_file, exercise_pointer: ExercisePointer, start_index: int 
 
 # -- SOLUTION & FEEDBACK HANDLING --
 
-def get_solution(current_file: list, exercise_pointer: ExercisePointer, exercise_points: list, printing=True):
+def get_solution(current_file: list, exercise_pointer: ExercisePointer, exercise_points: list,
+                 printing=True) -> list[str]:
     """Method to get the solution of an exercise of a person.
     Getting to the end of the exercise before and taking then
     everything to the end of the current task"""
@@ -79,7 +81,7 @@ def get_solution(current_file: list, exercise_pointer: ExercisePointer, exercise
     return solution
 
 
-def insert_in_file(file_path: str, exercise_pointer: ExercisePointer, points: str, text: str):
+def insert_in_file(file_path: str, exercise_pointer: ExercisePointer, points: str, text: str) -> str:
     """Method to edit/ fill in the correction into a pre-generated feedback file.
     This includes the points and a text for a given exercise."""
 
@@ -97,7 +99,8 @@ def insert_in_file(file_path: str, exercise_pointer: ExercisePointer, points: st
     return new_total
 
 
-def load_feedback(feedbacks: FileDictionary, exercise_pointer: ExercisePointer, solution_file: list) -> (bool, any):
+def load_feedback(feedbacks: FileDictionary, exercise_pointer: ExercisePointer,
+                  solution_file: list) -> tuple[bool, Any]:
     """Helper method that asks for a feedback comment. Alternatively a feedback can also be loaded with the id
     Additionally, with '>s' the entire solution can be printed out."""
 
@@ -123,7 +126,7 @@ def load_feedback(feedbacks: FileDictionary, exercise_pointer: ExercisePointer, 
         return False, comment
 
 
-def delete_old_feedback(file_path: str, exercise_pointer: ExercisePointer, exercise_points: list):
+def delete_old_feedback(file_path: str, exercise_pointer: ExercisePointer, exercise_points: list) -> None:
     """To delete the feedback of a task or subtask from a feedback_file. Removing the previous given
     points from the total points and setting the points from the task to 0 """
 
@@ -151,7 +154,7 @@ def delete_old_feedback(file_path: str, exercise_pointer: ExercisePointer, exerc
 
 # -- HELPER METHODS --
 
-def trailing_sep(path: str, should_have_sep: bool = True):
+def trailing_sep(path: str, should_have_sep: bool = True) -> str:
     """Small helper function that ensures that there is or is not a tailing path separator"""
 
     if path[-1] != os.sep and should_have_sep:
@@ -161,26 +164,30 @@ def trailing_sep(path: str, should_have_sep: bool = True):
     return path
 
 
-def count_sublists(some_list: list):
+def sum_sublist_lengths(some_list: list) -> int:
+    """Helper function for summing up all lengths, lists inside a list have"""
     return sum(map(lambda x: len(x), some_list))
 
 
-def sol_exists(file: list, exercise_pointer: ExercisePointer, ex_points: list):
-    # checks if the person solved the exercise, i.e. there exists an exercise for the current pointer
+def sol_exists(file: list, exercise_pointer: ExercisePointer):
+    """Checks if the person solved the exercise, i.e. there exists an exercise for the current pointer"""
     return get_index(file, exercise_pointer,
                      start_index=get_index(file, exercise_pointer.decrement(inplace=False))) >= 0
 
 
-def get_input(message: str, input_type: str = 'boolean', text_wrap=True):
+def get_input(message: str, input_type: str = 'boolean', text_wrap=True) -> Any:
     """Retrieves an input from the console in a failsafe way"""
 
     while True:
         inp = str(input(message + '\n'))
         if input_type == 'boolean' and inp.lower() in ['n', 'y']:
+            # boolean values for being a 'yes'
             return inp.lower() == 'y'
         elif input_type == 'numeric' and re.match(r'\d+([.,]5)?', inp):
+            # parse points, make sure to use points, not commas
             return float(inp.replace(',', '.'))
         elif input_type == 'text':
+            # normal string input, but can be wrapped at length 80
             if text_wrap:
                 return textwrap.fill(str(inp), 80) if inp != '' else ' '
             return str(inp)

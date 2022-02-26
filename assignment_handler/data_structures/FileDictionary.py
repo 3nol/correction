@@ -5,7 +5,7 @@ import re
 class FileDictionary:
     """Data structure that represents a dictionary at runtime as well as when the program is not running"""
 
-    def __init__(self, file_path: str):
+    def __init__(self, file_path: str) -> None:
         """Initializes the FileDictionary with a specified file_path"""
         if os.path.exists(file_path) and file_path.endswith('.dict'):
             self.file_path = file_path
@@ -16,7 +16,7 @@ class FileDictionary:
         self.__dictionary: dict = {}
         self.__parse_file()
 
-    def __parse_file(self):
+    def __parse_file(self) -> None:
         """Parses the dictionary contents of the file in the format 'key :: value' and saves them to self.dict"""
         with open(self.file_path, mode='r', errors='strict', encoding='utf-8') as f:
             for entry in f.readlines():
@@ -29,7 +29,7 @@ class FileDictionary:
                     else:
                         print('ERROR: line cannot be parsed:\n' + str(entry).strip())
 
-    def __write_file(self):
+    def __write_file(self) -> None:
         """Synchronizes the dictionary with the file by writing its contents to it"""
         file_representation = []
         for key, value in self.__dictionary.items():
@@ -38,7 +38,7 @@ class FileDictionary:
         with open(self.file_path, mode='w', errors='strict', encoding='utf-8') as f:
             f.writelines(file_representation)
 
-    def get(self, key, errors=False):
+    def get(self, key, errors=False) -> str:
         """Simple getter method to retrieve the value"""
         try:
             return self.__dictionary[key]
@@ -46,7 +46,7 @@ class FileDictionary:
             if errors:
                 print('ERROR: key was not found in the dictionary')
 
-    def insert(self, key: str, value: str, prefix: str = '', errors=False):
+    def insert(self, key: str, value: str, prefix: str = '', errors=False) -> None:
         """Inserts a key,value pair into the dictionary, if no key is specified one is created from the prefix"""
         if key == '':
             # if key is empty, a key is created by using the specified prefix and a unique number
@@ -60,7 +60,7 @@ class FileDictionary:
         # syncing with the file
         self.__write_file()
 
-    def delete(self, key, errors=False):
+    def delete(self, key, errors=False) -> str:
         """Deletes a key,value pair from the dictionary, then syncs it with the file"""
         value = self.get(key, errors)
         if value is not None:

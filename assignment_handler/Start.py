@@ -35,7 +35,7 @@ def handle_cli_args(args: list) -> None:
         Correction(gc.get('source_path'), ass_number.zfill(2), student_names=students).setup()
         exit(0)
     except KeyboardInterrupt:
-        print('\nvery understandable, have a nice day! :)')
+        print('\nVery understandable, have a nice day! :)')
         exit(1)
 
 
