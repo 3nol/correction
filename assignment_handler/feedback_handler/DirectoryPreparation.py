@@ -12,18 +12,23 @@ from assignment_handler.utilities.Utility import \
     trailing_sep, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback, delete_old_feedback
 
 
-def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDictionary) -> list:
+# -- FINDING SOLUTIONS --
+
+def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDictionary) -> list[str]:
     """Extracting the solutions of the students. Returning a list containing the students who already
     have been corrected in some parts"""
 
+    # storing lambda functions for generating the individual path names
     c_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('concat_folder'))}c_assignment{ass_number}.txt'''
     f_path = lambda x: f'''{trailing_sep(x) + trailing_sep(gc.get('feedback_folder'))}assignment{ass_number}.txt'''
 
     if feedbacks.get('_solution_files') is None \
             or not get_input('Do you want to use previously selected solution files? [y/n]'):
+        # let script find solution files automatically, you have to select the correct ones
         solution_files = find_solution_files(ass_number, student_names)
         feedbacks.insert('_solution_files', str(solution_files))
     else:
+        # use the previously defined ones
         solution_files = literal_eval(feedbacks.get('_solution_files'))
     corrected_students = []
     for student_name in solution_files:
@@ -31,6 +36,7 @@ def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDicti
         for file in sorted(solution_files[student_name]):
             if not is_ignored_file(file):
                 with open(file, mode='r', errors='replace', encoding='utf-8') as f:
+                    # get all solution content, someone has created for an assignment
                     solution_content.extend(f.readlines())
         # saving the old file to check for changes
         if os.path.exists(c_path(student_name)):
@@ -42,14 +48,60 @@ def extract_solutions(ass_number: str, student_names: list, feedbacks: FileDicti
                     compare_old_correction_to_new_solution(student_name, ass_number, solution_content,
                                                            old_concatenated_solution, feedbacks)
                 corrected_students.append(student_name)
+        # updated the c_assignment file
         with open(c_path(student_name), mode='w', errors='replace', encoding='utf-8') as f:
             f.writelines(solution_content)
         print('INFO: wrote to concatenated successfully:', student_name)
     return corrected_students
 
 
+def find_solution_files(ass_number: str, student_names: list) -> dict[str, list[str]]:
+    """Super smart method for detecting solutions in almost any folder structure. If multiple options are possible,
+    the tutor is asked to decide which one to pick"""
+
+    solutions = {}
+    for name in student_names:
+        potential_folders = [f for f in glob(f'{trailing_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
+                                             recursive=True) if os.path.isdir(f)]
+        solutions_files = []
+        if len(potential_folders) > 0:
+            if len(potential_folders) > 1:
+                print('INFO: multiple solutions folders for', name)
+                for folder in potential_folders:
+                    print(potential_folders.index(folder), folder)
+                i = -1
+                while not 0 <= i < len(potential_folders):
+                    index = input('Input the index for the correct folder: ')
+                    if re.match(r'\d+', index):
+                        i = int(index)
+            else:
+                i = 0
+            for path, _, file_list in os.walk(potential_folders[i]):
+                solutions_files.extend(map(lambda file: trailing_sep(path) + file, file_list))
+        else:
+            print_tree(name, exclude=gc.get('excluded_filetypes'), relative_path=True, show_hidden=False)
+            print('INFO: no solutions by', str(name).rsplit(os.path.sep, 1)[1])
+            while True:
+                files = get_input('Enter solution file paths (inside the student\'s directory), separated by comma.\n'
+                                  'Leave blank if no solution exists.',
+                                  input_type='text', text_wrap=False)
+                if files.strip() == '':
+                    break
+                files = list(map(lambda f: trailing_sep(name) + str(f).strip(), files.split(',')))
+                if all(map(os.path.isfile, files)):
+                    solutions_files.extend(files)
+                    break
+                else:
+                    print('INFO: at least one file does not exist, try again')
+            print('\n')
+        solutions[name] = solutions_files
+    return solutions
+
+
+# -- ANALYZE CHANGES IN SOLUTIONS --
+
 def compare_old_correction_to_new_solution(student_name: str, ass_number: str, new_solution: list, old_solution: list,
-                                           feedbacks: FileDictionary):
+                                           feedbacks: FileDictionary) -> None:
     """Helps to correct a partial corrected assignment by cycling through all the tasks and subtasks
     which already have a feedback. If there are changes in the students solution, the solution and the corresponding
     feedback is printed"""
@@ -72,10 +124,10 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         # solution status indicator: 0 = nothing changed, 1 = changes present, 2 = no solution
         solution_status = 0
         # if there is a solution
-        if sol_exists(new_solution, pointer, exercise_points):
+        if sol_exists(new_solution, pointer):
             new_exercise = get_solution(new_solution, pointer, exercise_points, printing=False)
             old_exercise = get_solution(old_solution, pointer, exercise_points, printing=False) \
-                if sol_exists(old_solution, pointer, exercise_points) else []
+                if sol_exists(old_solution, pointer) else []
             # if there is a difference between the two exercises
             if new_exercise != old_exercise:
                 print('\n')
@@ -120,50 +172,9 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         pointer.increment()
 
 
-def find_solution_files(ass_number: str, student_names: list) -> dict:
-    """Super smart method for detecting solutions in almost any folder structure. If multiple options are possible,
-    the tutor is asked to decide which one to pick"""
+# -- FEEDBACK GENERATION --
 
-    solutions = {}
-    for name in student_names:
-        potential_folders = [f for f in glob(f'{trailing_sep(name)}**{os.path.sep}*{str(int(ass_number))}*',
-                                             recursive=True) if os.path.isdir(f)]
-        solutions_files = []
-        if len(potential_folders) > 0:
-            if len(potential_folders) > 1:
-                print('INFO: multiple solutions folders for', name)
-                for folder in potential_folders:
-                    print(potential_folders.index(folder), folder)
-                i = -1
-                while not 0 <= i < len(potential_folders):
-                    index = input('Input the index for the correct folder: ')
-                    if re.match(r'\d+', index):
-                        i = int(index)
-            else:
-                i = 0
-            for path, _, file_list in os.walk(potential_folders[i]):
-                solutions_files.extend(map(lambda file: trailing_sep(path) + file, file_list))
-        else:
-            print_tree(name, exclude=gc.get('excluded_filetypes'), relative_path=True, show_hidden=False)
-            print('INFO: no solutions by', str(name).rsplit(os.path.sep, 1)[1])
-            while True:
-                files = get_input('Enter solution file paths (inside the student\'s directory), separated by comma.\n'
-                                  'Leave blank if no solution exists.',
-                                  input_type='text', text_wrap=False)
-                if files.strip() == '':
-                    break
-                files = list(map(lambda f: trailing_sep(name) + str(f).strip(), files.split(',')))
-                if all(map(os.path.isfile, files)):
-                    solutions_files.extend(files)
-                    break
-                else:
-                    print('INFO: at least one file does not exist, try again')
-            print('\n')
-        solutions[name] = solutions_files
-    return solutions
-
-
-def create_feedback(file_path: str, ass_number: str, exercise_points):
+def create_feedback(file_path: str, ass_number: str, exercise_points) -> None:
     """Goes through all names in the directory (except ***REMOVED***) and fills in a generated feedback file"""
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points)
@@ -173,7 +184,7 @@ def create_feedback(file_path: str, ass_number: str, exercise_points):
     print('generated file ' + feedback_path)
 
 
-def generate_feedback_file(ass_number: str, exercise_points):
+def generate_feedback_file(ass_number: str, exercise_points) -> list[str]:
     """Does the feedback generation, using the assignment number, the exercise point distribution
     and the name of the corrector"""
 
