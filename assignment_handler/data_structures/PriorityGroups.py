@@ -3,11 +3,13 @@ from assignment_handler.data_structures.ExercisePointer import ExercisePointer
 
 
 class PriorityGroups:
-    """Specialized data structure that manages groups with priorities. In this special case, the priorities
+    """
+    Specialized data structure that manages groups with priorities. In this special case, the priorities
     coincide with the exercise pointer in the form 'task.subtask' of Correction.py.
-    The data structure is initialized with a priority scheme (here by ass_number)."""
+    The data structure is initialized with a priority scheme (here by ass_number).
+    """
 
-    def __init__(self, ass_number: str):
+    def __init__(self, ass_number: str) -> None:
         self.groups = {}
         self.ass_number = ass_number
         self.exercise_points = gc.get(f'points_{ass_number}')
@@ -24,7 +26,7 @@ class PriorityGroups:
                     j = chr(ord(j) + 1)
             i += 1
 
-    def insert_at_pointer(self, student_name: str, exercise_pointer: ExercisePointer):
+    def insert_at_pointer(self, student_name: str, exercise_pointer: ExercisePointer) -> None:
         """Insertion method that puts an object (student_name) in a certain group"""
 
         # self.pointer is set to the lowest possible priority
@@ -33,10 +35,10 @@ class PriorityGroups:
         self.groups[str(exercise_pointer)].append(student_name)
 
     def peek_smallest(self) -> list:
-        # retrieves the current lowest priority group
+        """Retrieves the current lowest priority group"""
         return self.groups[str(self.pointer)]
 
-    def move_up_smallest(self):
+    def move_up_smallest(self) -> None:
         """Transition between groups. This method elevates all entries with the lowest priority by one group,
          i.e. the previously lowest group is emptied and the 'working' pointer is increased"""
 

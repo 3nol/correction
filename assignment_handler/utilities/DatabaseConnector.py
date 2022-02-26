@@ -1,5 +1,4 @@
 import os
-
 import mysql.connector
 import requests
 
@@ -18,7 +17,7 @@ def is_db_available() -> bool:
         return False
 
 
-def sql_query(query: str, autocommit: bool = True):
+def sql_query(query: str, autocommit: bool = True) -> list[tuple]:
     """Executes an SQL query on the mariaDB database of this project,
     returns all fetched result attributes"""
 
@@ -43,12 +42,12 @@ def sql_query(query: str, autocommit: bool = True):
     return result
 
 
-def insert_single_student(student_name: str, ass_number: str, total_points: str):
-    # inserts the points per assignment for a certain student into the database
+def insert_single_student(student_name: str, ass_number: str, total_points: str) -> None:
+    """Inserts the points per assignment for a certain student into the database"""
     sql_query(f"UPDATE points_table SET ass_{ass_number} = {total_points} WHERE student_name = '{student_name}'")
 
 
-def write_students_to_db(ass_number: str, student_names=None):
+def write_students_to_db(ass_number: str, student_names=None) -> None:
     """Rescans all feedbacks for a specific assignment, picks out the points and writes them to the DB"""
 
     if student_names is None:
@@ -67,11 +66,11 @@ def write_students_to_db(ass_number: str, student_names=None):
         print('probably the better choice')
 
 
-def update_total_points():
+def update_total_points() -> None:
     """Sums up all points form assignment 01 to 11 and stores the result in the column totals_points,
     does this for every student in the database"""
 
     sql_query('UPDATE points_table p SET total_points = ( \
-    SELECT ass_01 +  ass_02 + ass_03 + ass_04 + ass_05 + ass_06 + ass_07 + ass_08 + ass_09 + ass_10 + ass_11 \
-    FROM points_table q \
-    WHERE p.student_name = q.student_name)')
+        SELECT ass_01 +  ass_02 + ass_03 + ass_04 + ass_05 + ass_06 + ass_07 + ass_08 + ass_09 + ass_10 + ass_11 \
+        FROM points_table q \
+        WHERE p.student_name = q.student_name)')

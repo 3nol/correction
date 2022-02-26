@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 
 class GlobalConstants:
@@ -58,7 +59,7 @@ class GlobalConstants:
     }
 
     @staticmethod
-    def get(key: str) -> any:
+    def get(key: str) -> Any:
         """Static getter method which retrieves the constants,
         has an in-built shortcut for getting the points per assignments"""
         try:
