@@ -1,4 +1,4 @@
-from assignment_handler.Config import GlobalConstants as gc
+from Config import GlobalConstants as gc
 
 
 class ExercisePointer:

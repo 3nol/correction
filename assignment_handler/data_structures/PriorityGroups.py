@@ -1,5 +1,5 @@
-from assignment_handler.Config import GlobalConstants as gc
-from assignment_handler.data_structures.ExercisePointer import ExercisePointer
+from Config import GlobalConstants as gc
+from data_structures.ExercisePointer import ExercisePointer
 
 
 class PriorityGroups:

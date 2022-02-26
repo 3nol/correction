@@ -2,8 +2,8 @@ import os
 import sys
 from itertools import dropwhile
 
-from assignment_handler.Config import GlobalConstants as gc
-from assignment_handler.feedback_handler.Correction import init_names, init_folders, Correction
+from Config import GlobalConstants as gc
+from feedback_handler.Correction import init_names, init_folders, Correction
 
 
 def collect_solution_only_students(ass_number: str) -> list[str]:

@@ -3,9 +3,9 @@ import re
 import textwrap
 from typing import Any
 
-from assignment_handler.Config import GlobalConstants as gc
-from assignment_handler.data_structures.ExercisePointer import ExercisePointer
-from assignment_handler.data_structures.FileDictionary import FileDictionary
+from Config import GlobalConstants as gc
+from data_structures.ExercisePointer import ExercisePointer
+from data_structures.FileDictionary import FileDictionary
 
 
 # -- INDEX MAGIC --

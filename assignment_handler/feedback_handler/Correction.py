@@ -1,14 +1,14 @@
 import os
 import re
 
-from assignment_handler.Config import GlobalConstants as gc
-from assignment_handler.data_structures.ExercisePointer import ExercisePointer
-from assignment_handler.data_structures.FileDictionary import FileDictionary
-from assignment_handler.data_structures.PriorityGroups import PriorityGroups
-from assignment_handler.feedback_handler.DirectoryPreparation import extract_solutions, create_feedback
-from assignment_handler.utilities.DatabaseConnector import \
+from Config import GlobalConstants as gc
+from data_structures.ExercisePointer import ExercisePointer
+from data_structures.FileDictionary import FileDictionary
+from data_structures.PriorityGroups import PriorityGroups
+from feedback_handler.DirectoryPreparation import extract_solutions, create_feedback
+from utilities.DatabaseConnector import \
     is_db_available, sql_query, insert_single_student, update_total_points
-from assignment_handler.utilities.Utility import \
+from utilities.Utility import \
     trailing_sep, sum_sublist_lengths, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback
 
 

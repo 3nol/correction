@@ -3,12 +3,12 @@ import re
 from ast import literal_eval
 from glob import glob
 
-from assignment_handler.Config import GlobalConstants as gc
-from assignment_handler.data_structures.ExercisePointer import ExercisePointer
-from assignment_handler.data_structures.FileDictionary import FileDictionary
-from assignment_handler.utilities.DatabaseConnector import insert_single_student, update_total_points
-from assignment_handler.utilities.Tree import print_tree
-from assignment_handler.utilities.Utility import \
+from Config import GlobalConstants as gc
+from data_structures.ExercisePointer import ExercisePointer
+from data_structures.FileDictionary import FileDictionary
+from utilities.DatabaseConnector import insert_single_student, update_total_points
+from utilities.Tree import print_tree
+from utilities.Utility import \
     trailing_sep, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback, delete_old_feedback
 
 
