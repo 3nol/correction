@@ -1,9 +1,8 @@
 
-# ToDos for correction project
+# Todos for correction project
 
-## Create dokumentation
+## Create documentation
 
-- Configuration of paths and other things
+- Setting up the configuration
 - Usage of the program
 - Overview over each module
-- Adding comments if necessary
