@@ -15,4 +15,4 @@ In our case that was done with MariaDB, connecting to it via `mysql-connector-py
 
 ## Further information
 
-For the documentation, look [here](https://github.com/3nol/correction/docs).
+For the documentation, look [here](https://https://github.com/3nol/correction/tree/master/docs).
