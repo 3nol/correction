@@ -31,11 +31,11 @@ class GlobalConstants:
         },
 
         'db': {
-            'user': ***REMOVED***,
-            'password': ***REMOVED***,
-            'host': ***REMOVED***,
-            'port': ***REMOVED***,
-            'database': ***REMOVED***
+            'user': '',
+            'password': '',
+            'host': '',
+            'port': 0,
+            'database': ''
         },
 
         'concat_folder': 'concatenated',
