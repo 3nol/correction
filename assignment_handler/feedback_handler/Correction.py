@@ -1,5 +1,6 @@
 import os
 import re
+from typing import Union
 
 from Config import GlobalConstants as gc
 from data_structures.ExercisePointer import ExercisePointer
@@ -175,7 +176,7 @@ class Correction:
                     temp_pointer.increment()
             self.task_queue.move_up_smallest()
 
-    def __get_exercise_pointer_from_feedback(self, student_name: str) -> ExercisePointer:
+    def __get_exercise_pointer_from_feedback(self, student_name: str) -> Union[int, ExercisePointer]:
         """Detects how far feedback has been giving by analyzing the feedback file and returning a corresponding
         task pointer in the form 'task.subtask'. This is used to determine the starting point for the correction"""
 
