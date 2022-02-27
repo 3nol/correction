@@ -6,7 +6,7 @@ from glob import glob
 from Config import GlobalConstants as gc
 from data_structures.ExercisePointer import ExercisePointer
 from data_structures.FileDictionary import FileDictionary
-from utilities.DatabaseConnector import insert_single_student, update_total_points
+from utilities.DatabaseConnector import is_db_available, insert_single_student, update_total_points
 from utilities.Tree import print_tree
 from utilities.Utility import \
     trailing_sep, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback, delete_old_feedback
@@ -168,8 +168,9 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
         if solution_status > 0:
             delete_old_feedback(feedback_path, pointer, exercise_points)
             new_total_points = insert_in_file(feedback_path, pointer, str(points), comment)
-            insert_single_student(just_name, ass_number, new_total_points)
-            update_total_points()
+            if is_db_available():
+                insert_single_student(just_name, ass_number, new_total_points)
+                update_total_points()
         pointer.increment()
 
 

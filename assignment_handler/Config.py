@@ -16,6 +16,7 @@ class GlobalConstants:
         'corrector': 'Richard Feynman',
         'source_path': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
         'feedback_filepath': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
+        'offline_mode': False,
         'points_': {
             '01': [[3, 2], [3], [2]],
             '02': [[10], [0]],
@@ -68,4 +69,14 @@ class GlobalConstants:
             return GlobalConstants.__conf[key]
         except KeyError:
             print(f'GlobalConstant not found: {key}')
+            exit(1)
+
+    @staticmethod
+    def set(key: str, value: Any) -> None:
+        """Static setter method which sets some constants,
+        currently only allows for setting the 'offline_mode' attribute"""
+        if key in ['offline_mode']:
+            GlobalConstants.__conf[key] = value
+        else:
+            print(f'GlobalConstant is not allowed to be set: {key}')
             exit(1)

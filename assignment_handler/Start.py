@@ -8,6 +8,7 @@ from feedback_handler.Correction import init_names, init_folders, Correction
 
 def collect_solution_only_students(ass_number: str) -> list[str]:
     """Collects only students who handed in something for the given assignment"""
+
     student_names = set()
     for student in [f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()]:
         for directory, _, files in os.walk(student):
@@ -23,14 +24,22 @@ def collect_solution_only_students(ass_number: str) -> list[str]:
 def handle_cli_args(args: list) -> None:
     """Handles the commandline arguments which are:
         - 1. ass_number (maybe be single digit, will be padded with zeros)
-        - 2. optional flag for solutions only: -s or --solution-only (see method above)"""
+        - 2. optional flag for solutions only: -s or --solution-only (see method above)
+        - 3. optional flag for offline mode (no db syncing): -o or --offline-mode"""
+
+    solution_only = ['-s', '--solution-only']
+    offline_mode = ['-o', '--offline-mode']
+
     try:
         students = None
         # parse assignment number neatly
         ass_number = ''.join(dropwhile(lambda c: c == '0', str(args[1])))
-        if len(args) > 2 and args[2] in ['-s', '--solution-only']:
+        if (len(args) > 2 and args[2] in solution_only) or (len(args) > 3 and args[3] in solution_only):
             # solution-only flag is present
             students = collect_solution_only_students(ass_number)
+        if (len(args) > 2 and args[2] in offline_mode) or (len(args) > 3 and args[3] in offline_mode):
+            # offline-mode flag is present
+            gc.set('offline_mode', True)
         # start the correction by using the source path and the collected students
         Correction(gc.get('source_path'), ass_number.zfill(2), student_names=students).setup()
         exit(0)

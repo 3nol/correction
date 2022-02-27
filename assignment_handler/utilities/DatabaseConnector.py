@@ -25,11 +25,13 @@ def initialize_table(assignment_count: int) -> None:
 def is_db_available() -> bool:
     """Helper method to check for the database connection"""
 
+    if gc.get('offline_mode'):
+        return False
     try:
         requests.get(f'''https://{gc.get('db')['host']}''', timeout=5)
         return True
     except (requests.ConnectionError, requests.Timeout):
-        print('ERROR: not connected to the internet, correction starts in offline mode!')
+        print('ERROR: cannot establish connection to database, correction continues offline')
         return False
 
 
