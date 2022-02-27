@@ -107,7 +107,8 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
     feedback is printed"""
 
     just_name = str(student_name).rsplit(os.path.sep, 1)[1]
-    feedback_path = f'{trailing_sep(student_name)}feedback{os.path.sep}assignment{ass_number}.txt'
+    feedback_path = f'''{trailing_sep(student_name) + trailing_sep(gc.get('feedback_folder'))
+                         }assignment{ass_number}.txt'''
     exercise_points = gc.get(f'points_{ass_number}')
     pointer = ExercisePointer(ass_number)
 
@@ -175,10 +176,11 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
 # -- FEEDBACK GENERATION --
 
 def create_feedback(file_path: str, ass_number: str, exercise_points) -> None:
-    """Goes through all names in the directory (except fuchs) and fills in a generated feedback file"""
+    """Goes through all names in the directory and fills in a generated feedback file"""
 
     empty_feedback = generate_feedback_file(ass_number, exercise_points)
-    feedback_path = f'{trailing_sep(file_path, True)}feedback{os.path.sep}assignment{ass_number}.txt'
+    feedback_path = f'''{trailing_sep(file_path, True) + trailing_sep(gc.get('feedback_folder'))
+                         }assignment{ass_number}.txt'''
     with open(feedback_path, mode='w', errors='replace', encoding='utf-8') as file:
         file.writelines(empty_feedback)
     print('generated file ' + feedback_path)
