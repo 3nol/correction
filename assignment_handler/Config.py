@@ -13,7 +13,7 @@ class GlobalConstants:
 
     # dictionary which stores everything
     __conf = {
-        'corrector': 'Leon Wenzler',
+        'corrector': 'Richard Feynman',
         'source_path': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
         'feedback_filepath': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
         'points_': {
@@ -40,7 +40,7 @@ class GlobalConstants:
 
         'concat_folder': 'concatenated',
         'feedback_folder': 'feedback',
-        'excluded_names': ['clara.biedermann', 'leon.wenzler', 'johannes.fuchs'],
+        'excluded_names': ['chuck.norris'],
         'excluded_filetypes': [
             '.gitkeep', '.*docx', '.*odt', '.*pdf', '.*jpe?g', '.*png', '.*zip', '.*html'
         ],

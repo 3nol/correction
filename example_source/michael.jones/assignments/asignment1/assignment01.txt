@@ -1,5 +1,5 @@
 # Assignment 01
-# leon_wenzler
+# michael_jones
 #
 #
 #
@@ -8,8 +8,8 @@
 # a)
 
 #
-# 1b)
-Hallo
+# b)
+
 
 #
 #

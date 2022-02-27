@@ -1,5 +1,5 @@
 # Assignment 01
-# clara_biedermann
+# ann_smith
 #
 #
 Task 1:

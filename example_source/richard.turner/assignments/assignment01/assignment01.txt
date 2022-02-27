@@ -1,5 +1,5 @@
 # Assignment 01
-# jannes_mueller
+# richard_turner
 #
 #
 #
@@ -8,8 +8,8 @@
 # a)
 
 #
-# b)
-
+# 1b)
+Hallo
 
 #
 #
