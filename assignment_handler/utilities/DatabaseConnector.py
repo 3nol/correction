@@ -6,6 +6,22 @@ from Config import GlobalConstants as gc
 from utilities.Utility import trailing_sep, get_input
 
 
+def initialize_table(assignment_count: int) -> None:
+    """Takes an assignment count, e.g. 10, and executes a create table statement.
+    Table is in the following format:
+        |--------------|--------|--------|--------|-----|--------------|
+        | student_name | ass_01 | ass_02 | ass_03 | ... | total_points |
+        |--------------|--------|--------|--------|-----|--------------|
+    This script assumes this form of the database table.
+    The attribute total_points is dependent on the ass_XX attribute, see below (update_total_points)."""
+
+    ddl = 'create table points_table (student_name varchar(50) not null primary key, '
+    for i in range(1, assignment_count+1):
+        ddl += rf'ass_{str(i).zfill(2)} decimal(4, 1) default 0.0 not null, '
+    ddl += 'total_points decimal(4, 1) default 0.0 not null);'
+    sql_query(ddl, autocommit=True)
+
+
 def is_db_available() -> bool:
     """Helper method to check for the database connection"""
 
@@ -23,7 +39,7 @@ def sql_query(query: str, autocommit: bool = True) -> list[tuple]:
 
     result = []
     try:
-        # connection to Jannes database <3
+        # connection to the database
         con = mysql.connector.connect(
             user=gc.get('db')['user'],
             password=gc.get('db')['password'],
