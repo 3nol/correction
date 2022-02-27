@@ -31,11 +31,11 @@ class GlobalConstants:
         },
 
         'db': {
-            'user': 'root',
-            'password': 'p\'d3@\'dGwL4e;Yxa',
-            'host': 'port.halloibims.com',
-            'port': 7001,
-            'database': 'sq'
+            'user': '',
+            'password': '',
+            'host': '',
+            'port': 0,
+            'database': ''
         },
 
         'concat_folder': 'concatenated',
