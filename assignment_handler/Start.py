@@ -49,7 +49,6 @@ def handle_cli_args(args: list) -> None:
 
 
 if __name__ == '__main__':
-    sys.argv = ['blub', '02']
     # inserts all given names into the database
     # init_names([name1, name2, name3, ...])
 
