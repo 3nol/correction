@@ -54,23 +54,19 @@ class Correction:
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
         self.assignment_number: str = assignment_number
-        # PriorityGroups objects to manage remaining students (to be corrected)
-        self.task_queue: PriorityGroups = PriorityGroups(assignment_number)
-        # getting points distribution from config file 'assignment_config.txt'
-        self.exercise_points: list = gc.get(f'points_{self.assignment_number}')
-        # flat-mapping all names of tutorial attendants
-        self.student_names: list = student_names if student_names is not None \
-            else [f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()]
-        # tracking the status of the corrected tasks
-        self.corrected_task_amount: int = 0
-        # storing feedbacks that were given
+        self.task_queue: PriorityGroups = PriorityGroups(assignment_number)  # manage remaining students
+        self.exercise_points: list = gc.get(f'points_{self.assignment_number}')  # point distribution
+        self.student_names: list = self.__get_student_names(student_names)  # retrieving students
+        self.corrected_task_amount: int = 0  # tracking the status of the corrected tasks
+
+        # setting up the feedbacks.dict FileDictionary
         feedback_file_path: str = trailing_sep(gc.get('feedback_filepath')) + f'{self.assignment_number}_feedbacks.dict'
-        # initializing feedback file
         if not os.path.isfile(feedback_file_path):
-            # creating an empty file
+            # creating an empty file, if non-existent
             open(feedback_file_path, mode='w', encoding='utf-8').close()
-        # setting up the FileDictionary and ensuring the correct assignment's feedbacks are selected
         self.feedbacks = FileDictionary(feedback_file_path)
+
+        # ensuring the correct assignment's feedbacks are selected
         if self.feedbacks.get('.ass_number') != assignment_number:
             if get_input(f'Should feedbacks.dict be overridden? [y/n]'):
                 # erasing all content from file
@@ -79,14 +75,25 @@ class Correction:
             else:
                 exit(1)
 
-    def get_status(self) -> str:
-        # calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage
+    def __get_status(self) -> str:
+        """Calculates the ratio between corrected tasks and all tasks in total, then formats it as percentage"""
         fraction_corrected = self.corrected_task_amount / \
                              (sum_sublist_lengths(self.exercise_points) * len(self.student_names))
         return f'''{str(fraction_corrected)[2:4].ljust(2, '0')}.{str(fraction_corrected)[4:6].ljust(2, '0')}%'''
 
-    def get_just_names(self) -> list[str]:
-        # splits the student's name from the file path and returns only it
+    def __get_student_names(self, student_names: list[str]) -> list[str]:
+        """Retrieves the names of the students that should be given feedback on their submissions.
+        If student_names are specified, this list is used. Otherwise, the ones from 'source_path' are collected."""
+        all_names = []
+        if student_names is not None:
+            all_names.extend(student_names)
+        else:
+            all_names.extend([f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()])
+        return list(filter(lambda x: x not in gc.get('excluded_names'), all_names))
+
+
+    def __get_base_names(self) -> list[str]:
+        """Splits the student's name from the file path and returns only it"""
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.student_names))
 
     def setup(self) -> None:
@@ -201,7 +208,7 @@ class Correction:
         the right task is extracted and the tutor is asked for a comment, correctness and points.
         Returns the comment and the received points"""
 
-        print('\n-------- ' + just_name + ' @ ' + str(self.get_status()) + ' --------\n')
+        print('\n-------- ' + just_name + ' @ ' + str(self.__get_status()) + ' --------\n')
         loaded, comment = load_feedback(self.feedbacks, temp_pointer, solution_file)
         if loaded:
             return comment
