@@ -47,6 +47,14 @@ PriorityGroups makes sure that everything restarts correctly and nothing is forg
 ## Feedback handler
 
 ### Correction
+
+Contains the central `Correction` class which encapsulates a correction process for one assignment.
+The class is instantiated with a string assignment number, in a two-digit format.
+Additionally, a list of students can be passed for only considering a subset of students.
+The process is started by calling `start()`. This method first initializes the `task_queue` (PriorityQueue).
+After that, the all students are sequentially cycled through and the interactive correction takes place.
+Afterwards, points are recalculated to minimize errors, and, if not in *offline-mode*, synced to the database. 
+
 ### DirectoryPreparation
 
 
