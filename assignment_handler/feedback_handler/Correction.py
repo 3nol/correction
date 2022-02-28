@@ -96,7 +96,7 @@ class Correction:
         """Splits the student's name from the file path and returns only it"""
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.student_names))
 
-    def setup(self) -> None:
+    def start(self) -> None:
         """Starts the correction process by checking against the generated tmp save file,
         if it is empty, new feedbacks are generated for that assignment number,
         otherwise the current progress is read from the save and restored"""
@@ -125,7 +125,7 @@ class Correction:
                 print('new feedback templates generated for', student)
                 self.task_queue.insert_at_pointer(student, start_pointer)
         if self.task_queue.pointer is not None:
-            self.start_correction()
+            self.__do_correction()
         else:
             print("There is no one left to correct!")
         print('--- CORRECTION DONE ---')
@@ -134,7 +134,7 @@ class Correction:
         if self.sync_all_feedbacks():
             print('--- DATABASE UPDATE DONE ---')
 
-    def start_correction(self) -> None:
+    def __do_correction(self) -> None:
         """Does the sequential correction process by cycling through each task (and its subtasks)
         for each student. This means, first all ex. 01 are corrected, then all ex. 02, ...
         During that, the save file is continually updated to keep track"""
