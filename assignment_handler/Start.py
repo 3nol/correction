@@ -41,7 +41,7 @@ def handle_cli_args(args: list) -> None:
             # offline-mode flag is present
             gc.set('offline_mode', True)
         # start the correction by using the source path and the collected students
-        Correction(ass_number.zfill(2), student_names=students).setup()
+        Correction(ass_number.zfill(2), student_names=students).start()
         exit(0)
     except KeyboardInterrupt:
         print('\nVery understandable, have a nice day! :)')
