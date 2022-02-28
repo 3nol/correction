@@ -91,7 +91,6 @@ class Correction:
             all_names.extend([f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()])
         return list(filter(lambda x: x not in gc.get('excluded_names'), all_names))
 
-
     def __get_base_names(self) -> list[str]:
         """Splits the student's name from the file path and returns only it"""
         return list(map(lambda name: str(name).rsplit(os.path.sep, 1)[1], self.student_names))
