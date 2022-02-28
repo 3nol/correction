@@ -57,9 +57,32 @@ Afterwards, points are recalculated to minimize errors, and, if not in *offline-
 
 ### DirectoryPreparation
 
+This does most of the hard work. At the start of the correction process, `extract_solutions()` is called to pick out
+all submissions the current assignment. Once all file paths to the associated files were found,
+they are cached in the `XX_feedbacks.dict` file under the attribute `_solution_files`.
+Because of the script's ability to be stopped at any time, the preparation was built to deal with updated submissions.
+If this is the case, `compare_old_correction_to_new_solution()` (nice name) is called. Here, the correcting person can 
+interactively decide whether already given feedback is still relevant.
+Additionally, this module does the pre-generation of feedback file templates which are filled later on.
 
 ## Utilities
 
 ### DatabaseConnector
+
+Does all the work considering the database. The most central method is `sql_query()` which just takes a string 
+SQL query and passes it on to the database. Queried results are returned. \
+With `initialize_table()` the needed database (named *points_table*) can be created.
+Other methods are for writing points to the database and updating conditional attributes 
+(`total_points` being the sum of all `ass_XX` fields).
+
 ### Utility
+
+Random collection of helpful methods. The most important being `get_index()`.
+This one finds tasks in submissions and points in feedback files. It works by using the collections of possible matches
+('maintask_prefixes' and 'subtask_prefixes') to match against every line. \
+Other methods are `get_solution()` (retrieves submission to be printed),
+`load_feedback()` (deals with the input of feedback and points) and `insert_in_file()` which is used for the feedbacks.
+
 ### Tree
+
+Very neat module that allows for pretty printing of file trees. May become a pip package at some time.  
