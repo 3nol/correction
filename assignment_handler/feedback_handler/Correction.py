@@ -50,10 +50,9 @@ class Correction:
     - Correction-process: sequential go-through of exercises of all students
     """
 
-    def __init__(self, file_path: str, assignment_number: str, student_names=None) -> None:
+    def __init__(self, assignment_number: str, student_names=None) -> None:
         """Sets all class variables, mainly the assignment number, the progress pointer and the tmp save path"""
 
-        self.file_path: str = file_path
         self.assignment_number: str = assignment_number
         # PriorityGroups objects to manage remaining students (to be corrected)
         self.task_queue: PriorityGroups = PriorityGroups(assignment_number)
@@ -61,7 +60,7 @@ class Correction:
         self.exercise_points: list = gc.get(f'points_{self.assignment_number}')
         # flat-mapping all names of tutorial attendants
         self.student_names: list = student_names if student_names is not None \
-            else [f.path for f in os.scandir(self.file_path) if f.is_dir()]
+            else [f.path for f in os.scandir(gc.get('source_path')) if f.is_dir()]
         # tracking the status of the corrected tasks
         self.corrected_task_amount: int = 0
         # storing feedbacks that were given
