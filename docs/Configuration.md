@@ -22,7 +22,7 @@ Python dictionaries have a JSON-like format, making configuration easy.
 All the underlying specifications around the correction process.
 - `corrector`: the correcting person's name which will be written in the feedback files
 - `source_path`: directory wherein all students' folders lay
-- `feedback_filepath`: filepath for the *feedback.dict* file, storing all given feedbacks
+- `feedback_filepath`: filepath for the *feedbacks.dict* file, storing all given feedbacks
 - `offline_mode`: disables syncing with the database, contents are only written locally
 
 ### Assignment point distribution
