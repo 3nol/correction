@@ -54,6 +54,7 @@ class ExercisePointer:
             if inplace:
                 self.subtask = chr(ord(self.subtask) + 1)
             else:
+                maintask = self.maintask
                 subtask = chr(ord(self.subtask) + 1)
         return ExercisePointer(self.ass_number, maintask, subtask)
 
@@ -76,6 +77,7 @@ class ExercisePointer:
             if inplace:
                 self.subtask = chr(ord(self.subtask) - 1)
             else:
+                maintask = self.maintask
                 subtask = chr(ord(self.subtask) - 1)
         return ExercisePointer(self.ass_number, maintask, subtask)
 
