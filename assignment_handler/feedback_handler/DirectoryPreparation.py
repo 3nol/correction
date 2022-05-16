@@ -159,7 +159,7 @@ def compare_old_correction_to_new_solution(student_name: str, ass_number: str, n
                         # check validity of inputted points
                         if 0.0 <= points <= possible_points:
                             break
-                    feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=pointer + '_')
+                    feedbacks.insert('', str(points) + ', ' + comment.replace('\n', ' '), prefix=str(pointer) + '_')
                 else:
                     # solution is correct -> give max. points
                     points = possible_points
