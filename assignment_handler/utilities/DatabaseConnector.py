@@ -86,11 +86,12 @@ def write_students_to_db(ass_number: str, student_names=None) -> None:
 
 
 def update_total_points() -> None:
-    """Sums up all points form assignment 01 to 11 and stores the result in the column totals_points,
+    """Sums up points from all assignments and stores the result in the column totals_points,
     does this for every student in the database"""
 
+    ass_expr = 'ass_' + ' + ass_'.join(gc.get('points_').keys())
     sql_query('UPDATE points_table p SET total_points = ( \
-        SELECT ass_01 +  ass_02 + ass_03 + ass_04 + ass_05 + ass_06 + ass_07 + ass_08 + ass_09 + ass_10 + ass_11 \
+        SELECT ' + ass_expr + ' \
         FROM points_table q \
         WHERE p.student_name = q.student_name)')
 

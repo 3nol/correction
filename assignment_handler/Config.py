@@ -65,7 +65,8 @@ class GlobalConstants:
         """Static getter method which retrieves the constants,
         has an in-built shortcut for getting the points per assignments"""
         try:
-            if key.startswith('points_'):
+            # requesting the total points of a certain assignment
+            if key.startswith('points_') and key.split('points_', 1)[1] != '':
                 return GlobalConstants.__conf['points_'][key.split('points_', 1)[1].zfill(2)]
             return GlobalConstants.__conf[key]
         except KeyError:
