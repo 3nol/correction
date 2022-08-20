@@ -35,7 +35,7 @@ class ExercisePointer:
         """Small helper function that splits an exercise pointer into task, subtask without throwing an error"""
         return self.maintask, self.subtask
 
-    def increment(self, inplace=True):  # -> ExercisePointer
+    def increment(self, inplace=True) -> 'ExercisePointer':
         """Increments the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
         1. -> 2.a  /  2.a -> 2.b  /  2.b -> 3."""
         maintask = subtask = ''
@@ -58,7 +58,7 @@ class ExercisePointer:
                 subtask = chr(ord(self.subtask) + 1)
         return ExercisePointer(self.ass_number, maintask, subtask)
 
-    def decrement(self, inplace=True):  # -> ExercisePointer
+    def decrement(self, inplace=True) -> 'ExercisePointer':
         """Decrements the progress pointer by one step, examples for ex_points [[3], [1,1], [4]]:
         1. -> 1.  /  2.b -> 2.a  /  3. -> 2.b"""
         maintask = subtask = ''
@@ -81,6 +81,6 @@ class ExercisePointer:
                 subtask = chr(ord(self.subtask) - 1)
         return ExercisePointer(self.ass_number, maintask, subtask)
 
-    def clone(self):  # -> ExercisePointer
+    def clone(self) -> 'ExercisePointer':
         """Helper method for cloning this object"""
         return ExercisePointer(self.ass_number, self.maintask, self.subtask)
