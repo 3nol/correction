@@ -8,7 +8,7 @@ from data_structures.FileDictionary import FileDictionary
 from data_structures.PriorityGroups import PriorityGroups
 from feedback_handler.DirectoryPreparation import extract_solutions, create_feedback
 from utilities.DatabaseConnector import \
-    is_db_available, sql_query, insert_single_student, update_total_points
+    is_db_available, sql_query, insert_single_student, update_total_points, update_failed_counter
 from utilities.Utility import \
     trailing_sep, sum_sublist_lengths, get_input, get_index, insert_in_file, sol_exists, get_solution, load_feedback
 
@@ -34,12 +34,17 @@ def init_folders() -> None:
     for name in dirnames:
         c_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('concat_folder')
         f_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('feedback_folder')
-        if name in dbnames and not os.path.exists(c_path) and not os.path.exists(f_path):
-            os.mkdir(c_path)
-            os.mkdir(f_path)
-            print(f'INFO: generated folders for {name}')
+        if name in dbnames:
+            print(f'INFO: name {name} found in database')
+            if not os.path.exists(c_path) and not os.path.exists(f_path):
+                os.mkdir(c_path)
+                os.mkdir(f_path)
+                print(f'INFO: generated folders for {name}')
+            else:
+                print(f'INFO: some folders already exist:'
+                      f'concat_path:{os.path.exists(c_path)}, feedback_path:{os.path.exists(f_path)},')
         else:
-            print(f'ERROR: folders could not be generated for {name}')
+            print(f'ERROR: folders could not be generated for {name}, not in db')
 
 
 class Correction:
@@ -267,6 +272,7 @@ class Correction:
                     insert_single_student(str(name).rsplit(os.path.sep, 1)[1], self.assignment_number,
                                           str(float(f.readlines()[1][1:].split('/', 1)[0])).split('.0', 1)[0])
             update_total_points()
+            update_failed_counter(self.assignment_number)
             return True
         else:
             print('ERROR: you have to be online to sync all feedbacks!')

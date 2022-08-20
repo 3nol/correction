@@ -80,6 +80,7 @@ def write_students_to_db(ass_number: str, student_names=None) -> None:
             insert_single_student(str(name).rsplit(os.path.sep, 1)[1], ass_number, total)
             print('-', str(name).rsplit(os.path.sep, 1)[1], total)
         update_total_points()
+        update_failed_counter(ass_number)
     else:
         print('probably the better choice')
 
@@ -90,5 +91,18 @@ def update_total_points() -> None:
 
     sql_query('UPDATE points_table p SET total_points = ( \
         SELECT ass_01 +  ass_02 + ass_03 + ass_04 + ass_05 + ass_06 + ass_07 + ass_08 + ass_09 + ass_10 + ass_11 \
+        FROM points_table q \
+        WHERE p.student_name = q.student_name)')
+
+
+def update_failed_counter(ass_number: str) -> None:
+    """Scans all points up to the current assignment and count the number that is below the configured value
+    an stores the result in the column failed_ass, does this for every student in the database"""
+
+    assignments_counted = list(range(3, int(ass_number) + 1))
+    if_queries = ' + '.join(map(lambda a: f'IF (q.ass_{str(a).zfill(2)} < ' + str(gc.get('points_passed')) + ', 1, 0)', assignments_counted))
+
+    sql_query(f'UPDATE points_table p SET failed_ass = ( \
+        SELECT {if_queries} \
         FROM points_table q \
         WHERE p.student_name = q.student_name)')

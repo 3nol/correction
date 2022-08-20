@@ -30,6 +30,8 @@ All the underlying specifications around the correction process.
 Description of maximum points for each exercise.
 - `points_`: dictionary containing two-digit-numbered entries of the assignment number
   - `XX`: list of points for assignment XX, first sublist entry corresponds to first task and so on...
+- `points_passed`: number of points needed for passing an assignment, 
+  for every assignment below that bound, the *failed_ass* column will be incremented 
 
 If a sublist entry has more than one number inside it, each number corresponds to a subtask. \
 Example: `01: [[3,2], [4]]` means, exercise 1a gives 3, 1b gives 2, and exercise 2 gives 4 points.

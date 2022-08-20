@@ -17,9 +17,9 @@ The configuration of these constants is outlined in
 Optionally, but recommended, is to use a database table to store all the points.
 For that, the table is assumed to have the following format:
 
-|student_name|ass_01|ass_02|ass_03|...|total_points|
-|------------|------|------|------|---|------------|
-|name1       |5     |3     |8     |...|16          |
+|student_name|ass_01|ass_02|ass_03|...|total_points|failed_ass|
+|------------|------|------|------|---|------------|----------|
+|name1       |5     |3     |8     |...|16          | 1        |
 |...
 
 For this, you don't need to pull out your SQL skills, `DatabaseConnector#initialize_table()` does that for you.
@@ -90,7 +90,7 @@ This just prints the submission content again.
 
 ### Exiting the program 
 
-A regular exit would be to finish giving feedback to all students.
-The program then rescans all feedback files, recalculates points, syncs everything to the database and exists.
-Alternatively you can just kill it, if you feel like it. \
-(Actually that's fine, was developed with robustness in mind.) 
+A regular exit would be finishing the feedback for all students.
+The program then rescans all feedback files, recalculates points, syncs everything to the database and exits.
+An alternative way is to just kill the program, if you feel like it. \
+(That's actually totally fine, it was developed with robustness in mind.) 
