@@ -16,7 +16,7 @@ class GlobalConstants:
         'corrector': 'Richard Feynman',
         'source_path': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
         'feedback_filepath': f'{os.getcwd().rsplit(os.path.sep, 1)[0]}{os.path.sep}example_source{os.path.sep}',
-        'offline_mode': False,
+        'offline_mode': True,
         'points_': {
             '01': [[0], [0], [0]],
             '02': [[0], [0], [0]],
