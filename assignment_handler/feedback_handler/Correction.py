@@ -26,16 +26,15 @@ def init_names(names: list, filepath=None) -> None:
         print('inserted student:', name)
 
 
-def init_folders() -> None:
+def init_folders(names: list = None) -> None:
     """Initializes both the concatenated and feedback folder for each folder whose name is present in the database"""
-
-    dbnames = list(map(lambda x: x[0], sql_query(f"SELECT student_name FROM points_table")))
+    if names is None:
+        names = list(map(lambda x: x[0], sql_query(f"SELECT student_name FROM points_table")))
     source_path, dirnames, _ = list(os.walk(gc.get('source_path')))[0]
     for name in dirnames:
         c_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('concat_folder')
         f_path = trailing_sep(source_path) + trailing_sep(name) + gc.get('feedback_folder')
-        if name in dbnames:
-            print(f'INFO: name {name} found in database')
+        if name in names:
             if not os.path.exists(c_path) and not os.path.exists(f_path):
                 os.mkdir(c_path)
                 os.mkdir(f_path)
